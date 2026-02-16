@@ -1,4 +1,3 @@
-// server/server.js
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -11,117 +10,150 @@ const FileSync = require('lowdb/adapters/FileSync');
 const app = express();
 const PORT = 5000;
 
-// --- 1. SETUP DATABASE (JSON FILE) ---
-// Meka thama ube database eka. Backup ganna lesi wenna file ekak widiyata thiyenne.
+// --- 1. SETUP ---
+fs.ensureDirSync('./data');
+fs.ensureDirSync('./uploads');
+
 const adapter = new FileSync('./data/db.json');
 const db = low(adapter);
 
-// Defaults (Data nattam hadanna)
-db.defaults({ products: [], categories: ['Exotic', 'Indoor'], admins: [], views: 1250 }).write();
+// Defaults
+db.defaults({ 
+  products: [], 
+  categories: ['Exotic', 'Indoor', 'Outdoor', 'Edibles'], 
+  admins: [{ id: 1, username: 'admin', password: '123', active: true }], 
+  gatePassword: '420',
+  views: 1250 
+}).write();
 
 // --- 2. MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
-// Uploads folder eka public link ekak karamu
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- 3. MULTER (FILE UPLOAD CONFIG) ---
+// --- 3. UPLOAD CONFIG ---
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = './uploads';
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir); // Folder nattam hadanawa
-    cb(null, dir);
-  },
+  destination: (req, file, cb) => cb(null, './uploads'),
   filename: (req, file, cb) => {
-    // Unique name ekak denawa (timestamp + extension)
-    cb(null, Date.now() + path.extname(file.originalname));
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
 const upload = multer({ storage });
 
 // --- 4. API ROUTES ---
 
-// A. Products Get
-app.get('/api/products', (req, res) => {
-  const products = db.get('products').value();
-  res.json(products);
+// > PRODUCTS
+app.get('/api/products', (req, res) => res.json(db.get('products').value()));
+
+app.post('/api/products', upload.array('files', 10), (req, res) => {
+  try {
+    const { name, price, category, description, specialOffer, offerPrice } = req.body;
+    const files = req.files || [];
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}/uploads/`;
+
+    const images = files.filter(f => f.mimetype.startsWith('image')).map(f => baseUrl + f.filename);
+    const videos = files.filter(f => f.mimetype.startsWith('video')).map(f => baseUrl + f.filename);
+
+    const newProduct = {
+      id: Date.now(),
+      name,
+      price: parseFloat(price),
+      offerPrice: parseFloat(offerPrice),
+      category,
+      description,
+      images,
+      videos,
+      specialOffer: specialOffer === 'true'
+    };
+
+    db.get('products').push(newProduct).write();
+    res.json({ success: true, product: newProduct });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed' });
+  }
 });
 
-// B. Product Add (With Images/Videos)
-app.post('/api/products', upload.array('files', 8), (req, res) => {
-  const { name, price, category, description, specialOffer, offerPrice } = req.body;
-  const files = req.files;
-
-  // Files walin Images & Videos wen karagannawa
-  const images = files.filter(f => f.mimetype.startsWith('image')).map(f => `/uploads/${f.filename}`);
-  const videos = files.filter(f => f.mimetype.startsWith('video')).map(f => `/uploads/${f.filename}`);
-
-  const newProduct = {
-    id: Date.now(),
-    name,
-    price: parseFloat(price),
-    offerPrice: parseFloat(offerPrice),
-    category,
-    description,
-    images,
-    videos,
-    specialOffer: specialOffer === 'true' // FormData eken enne string widiyata
-  };
-
-  db.get('products').push(newProduct).write();
-  res.json({ success: true, product: newProduct });
-});
-
-// C. Delete Product
 app.delete('/api/products/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  // Optional: Delete files from uploads folder too (Advanced)
-  db.get('products').remove({ id }).write();
+  db.get('products').remove({ id: parseInt(req.params.id) }).write();
   res.json({ success: true });
 });
 
-// D. Views Counter
-app.get('/api/views', (req, res) => {
-  const views = db.get('views').value();
-  db.update('views', n => n + 1).write();
-  res.json({ views });
+// > CATEGORIES
+app.get('/api/categories', (req, res) => res.json(db.get('categories').value()));
+app.post('/api/categories', (req, res) => {
+  const { category } = req.body;
+  if (!db.get('categories').includes(category).value()) {
+    db.get('categories').push(category).write();
+  }
+  res.json({ success: true });
+});
+app.delete('/api/categories/:name', (req, res) => {
+  db.get('categories').pull(req.params.name).write();
+  res.json({ success: true });
 });
 
-// E. Admin Login (Real Check)
+// > ADMINS
+app.get('/api/admins', (req, res) => res.json(db.get('admins').value()));
+app.post('/api/admins', (req, res) => {
+  const newAdmin = { id: Date.now(), ...req.body, active: true };
+  db.get('admins').push(newAdmin).write();
+  res.json({ success: true });
+});
+app.put('/api/admins/:id', (req, res) => {
+  db.get('admins').find({ id: parseInt(req.params.id) }).assign(req.body).write();
+  res.json({ success: true });
+});
+app.delete('/api/admins/:id', (req, res) => {
+  db.get('admins').remove({ id: parseInt(req.params.id) }).write();
+  res.json({ success: true });
+});
+
+// > AUTH & GATE
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   const admin = db.get('admins').find({ username, password }).value();
-  
-  // Hardcoded fallback if DB is empty (First time setup)
-  if (!admin && username === 'admin' && password === 'admin123') {
-    return res.json({ success: true, token: 'master-access' });
-  }
-
-  if (admin) {
-    res.json({ success: true, token: 'access-granted' });
-  } else {
-    res.status(401).json({ success: false });
-  }
+  if (admin) res.json({ success: true });
+  else res.status(401).json({ success: false });
 });
 
-// --- 5. BACKUP SYSTEM (Download ZIP) ---
+app.post('/api/gate/verify', (req, res) => {
+  const { password } = req.body;
+  const correct = db.get('gatePassword').value();
+  if (password === correct) res.json({ success: true });
+  else res.status(401).json({ success: false });
+});
+
+app.post('/api/gate/update', (req, res) => {
+  const { password } = req.body;
+  db.set('gatePassword', password).write();
+  res.json({ success: true });
+});
+
+// > VIEWS
+app.get('/api/views', (req, res) => {
+  db.update('views', n => n + 1).write();
+  res.json({ views: db.get('views').value() });
+});
+app.get('/api/stats', (req, res) => {
+  res.json({
+    products: db.get('products').size().value(),
+    categories: db.get('categories').size().value(),
+    admins: db.get('admins').size().value(),
+    views: db.get('views').value()
+  });
+});
+
+// > BACKUP
 app.get('/api/backup', async (req, res) => {
   const archive = archiver('zip', { zlib: { level: 9 } });
-  
-  res.attachment('norcal-backup.zip'); // File name eka
-
+  res.attachment('norcal-backup.zip');
   archive.pipe(res);
-
-  // 1. Database file eka danna
   archive.file('./data/db.json', { name: 'db.json' });
-
-  // 2. Uploads folder eka danna
   archive.directory('./uploads/', 'uploads');
-
   await archive.finalize();
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,0 +1,55 @@
+{
+  "products": [
+    {
+      "id": 1771048546124,
+      "name": "High Quality gumbo",
+      "price": 10,
+      "offerPrice": 8,
+      "category": "Gumbo",
+      "description": "Introducing Kiwi Berry Burst gummies, powered by FAST™, proprietary nano-emulsion technology, that delivers peak cannabinoid levels that are 2x higher with a 50% faster onset. Each pack contains two gummies each containing 5 mg THC + 5 mg CBD and are formulated for rapid cannabinoid absorption. Delight in the lush flavours of strawberry, kiwi, and passionfruit with this rapid onset sativa gummy.",
+      "images": [
+        "http://localhost:5000/uploads/1771048546104-765389831.webp"
+      ],
+      "videos": [
+        "http://localhost:5000/uploads/1771048546108-925136226.mp4"
+      ],
+      "specialOffer": true
+    },
+    {
+      "id": 1771048585122,
+      "name": "Edison Sonics Kiwi Berry Burst",
+      "price": 5,
+      "offerPrice": 0,
+      "category": "Edison",
+      "description": "Introducing Kiwi Berry Burst gummies, powered by FAST™, proprietary nano-emulsion technology, that delivers peak cannabinoid levels that are 2x higher with a 50% faster onset. Each pack contains two gummies each containing 5 mg THC + 5 mg CBD and are formulated for rapid cannabinoid absorption. Delight in the lush flavours of strawberry, kiwi, and passionfruit with this rapid onset sativa gummy.",
+      "images": [
+        "http://localhost:5000/uploads/1771048585026-830632088.webp",
+        "http://localhost:5000/uploads/1771048585026-934322577.webp"
+      ],
+      "videos": [
+        "http://localhost:5000/uploads/1771048585032-382905763.mp4"
+      ],
+      "specialOffer": false
+    }
+  ],
+  "categories": [
+    "Edison",
+    "Cannabis",
+    "Gumbo"
+  ],
+  "admins": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "123"
+    },
+    {
+      "id": 1771047256123,
+      "username": "Chamindu",
+      "password": "123456",
+      "active": true
+    }
+  ],
+  "views": 1262,
+  "gatePassword": "10954"
+}

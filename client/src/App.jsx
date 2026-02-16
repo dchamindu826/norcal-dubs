@@ -12,9 +12,8 @@ import Dashboard from './pages/AdminPanel/Dashboard';
 import ProductManager from './pages/AdminPanel/ProductManager';
 import CategoryManager from './pages/AdminPanel/CategoryManager';
 import GateSettings from './pages/AdminPanel/GateSettings';
-import AdminManager from './pages/AdminPanel/AdminManager';
+import AdminManager from './pages/AdminPanel/AdminManager'; // <--- Aluth Import Eka
 
-// 1. Layout Helper (Navbar thiyena pages walata)
 const MainLayout = ({ children }) => (
   <>
     <Navbar />
@@ -27,7 +26,6 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Session eke gate pass thiyenawada balanawa
     const session = sessionStorage.getItem('norcal_access');
     if (session) setIsUnlocked(true);
     setLoading(false);
@@ -38,7 +36,6 @@ function App() {
     sessionStorage.setItem('norcal_access', 'true');
   };
 
-  // 2. PUBLIC GUARD (Me component eken thama Public pages protect karanne)
   const PublicGuard = ({ children }) => {
     if (!isUnlocked) {
       return <Gate onUnlock={handleUnlock} />;
@@ -52,24 +49,19 @@ function App() {
     <Router>
       <Routes>
         
-        {/* --- ADMIN ZONE (No Gate Required) --- */}
-        {/* Admin Login eka Gate eken eliye thiyenne */}
+        {/* --- ADMIN ZONE --- */}
         <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* Admin Panel (Auth check wenne AdminLayout athule) */}
         <Route path="/admin" element={<AdminLayout />}>
            <Route index element={<Navigate to="/admin/dashboard" replace />} />
            <Route path="dashboard" element={<Dashboard />} /> 
            <Route path="products" element={<ProductManager />} />
            <Route path="categories" element={<CategoryManager />} />
-           <Route path="users" element={<AdminManager />} />
+           <Route path="users" element={<AdminManager />} /> {/* <--- Aluth Route Eka */}
            <Route path="settings" element={<GateSettings />} />
         </Route>
 
-
-        {/* --- PUBLIC ZONE (Protected by Gate) --- */}
-        {/* Hama public page ekakma 'PublicGuard' eken wrap karanawa */}
-        
+        {/* --- PUBLIC ZONE --- */}
         <Route path="/" element={
           <PublicGuard>
             <Home />
@@ -92,8 +84,6 @@ function App() {
           </PublicGuard>
         } />
 
-
-        {/* CATCH ALL (Waradi link gahuwoth Home ekata) */}
         <Route path="*" element={<Navigate to="/" replace />} />
         
       </Routes>
