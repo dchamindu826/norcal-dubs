@@ -6,13 +6,21 @@ const fs = require('fs-extra');
 const archiver = require('archiver');
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
+const TelegramBot = require('node-telegram-bot-api');
 
 const app = express();
 const PORT = 5000;
 
+// --- TELEGRAM CONFIG ---
+const TELEGRAM_TOKEN = '8482307153:AAF9x88RtIWcjXSq4-a-WPpHA8vdvPfjKJg'; 
+//const ADMIN_CHAT_ID = '6037266434';
+const ADMIN_CHAT_ID ='7905655241';
+
+const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: false });
+
 // --- 1. SETUP ---
-fs.ensureDirSync('./data');
-fs.ensureDirSync('./uploads');
+if (!fs.existsSync('./data')) fs.mkdirSync('./data');
+if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
 
 const adapter = new FileSync('./data/db.json');
 const db = low(adapter);
@@ -43,16 +51,86 @@ const upload = multer({ storage });
 
 // --- 4. API ROUTES ---
 
-// > PRODUCTS
+// > PLACE ORDER (UPDATED WITH SLIP & TELEGRAM PHOTO)
+// Note: We use upload.single('slip') to handle the optional payment proof
+app.post('/api/orders', upload.single('slip'), async (req, res) => {
+  try {
+    // FormData walin eddi data enne req.body eke strings widiyata.
+    // E nisa items JSON.parse karanna one.
+    const { customerName, telegram, phone, address, notes, total, paymentMethod } = req.body;
+    const items = JSON.parse(req.body.items || '[]');
+    
+    const slipFile = req.file; // Uploaded slip (if exists)
+
+    // 1. Save to DB
+    const orderId = Date.now();
+    const newOrder = {
+      id: orderId,
+      customer: { name: customerName, telegram, phone, address, notes },
+      items,
+      total,
+      paymentMethod,
+      slip: slipFile ? slipFile.filename : null,
+      status: 'Pending',
+      date: new Date().toLocaleString()
+    };
+    
+    // LowDB logic to save order (optional implementation)
+    // db.get('orders').push(newOrder).write(); 
+
+    // 2. PREPARE TELEGRAM MESSAGE
+    const itemString = items.map(i => `- ${i.name} ($${i.price})`).join('\n');
+    
+    const message = `
+🔥 <b>NEW ORDER ALERT!</b> 🔥
+
+<b>ID:</b> #${orderId}
+<b>Name:</b> ${customerName}
+<b>Phone:</b> ${phone}
+<b>Telegram:</b> @${telegram.replace('@', '')}
+<b>Address:</b> ${address}
+<b>Note:</b> ${notes || 'None'}
+
+🛒 <b>Order Details:</b>
+${itemString}
+
+💰 <b>Total:</b> $${total}
+💳 <b>Payment:</b> ${paymentMethod}
+${slipFile ? '✅ <b>Payment Slip Attached</b>' : '⚠️ <b>No Slip Uploaded</b>'}
+
+👇 <b>Click to Chat with Client:</b>
+https://t.me/${telegram.replace('@', '')}
+    `;
+
+    // 3. SEND TO TELEGRAM (PHOTO OR TEXT)
+    if (slipFile) {
+        // Slip ekak thiyenawa nam Photo ekak widiyata yawanna
+        const stream = fs.createReadStream(slipFile.path);
+        await bot.sendPhoto(ADMIN_CHAT_ID, stream, { caption: message, parse_mode: 'HTML' });
+    } else {
+        // Slip nattam Text witharak yawanna
+        await bot.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: 'HTML' });
+    }
+
+    res.json({ success: true, orderId });
+
+  } catch (err) {
+    console.error("Order Error:", err);
+    res.status(500).json({ error: 'Order failed' });
+  }
+});
+
+// > PRODUCTS (GET)
 app.get('/api/products', (req, res) => res.json(db.get('products').value()));
 
+// > PRODUCTS (POST)
 app.post('/api/products', upload.array('files', 10), (req, res) => {
   try {
-    const { name, price, category, description, specialOffer, offerPrice } = req.body;
+    const { name, price, category, pageType, description, specialOffer, offerPrice } = req.body;
     const files = req.files || [];
     const protocol = req.protocol;
     const host = req.get('host');
-    const baseUrl = `${protocol}://${host}/uploads/`;
+    const baseUrl = `${protocol}://${host}/uploads/`; 
 
     const images = files.filter(f => f.mimetype.startsWith('image')).map(f => baseUrl + f.filename);
     const videos = files.filter(f => f.mimetype.startsWith('video')).map(f => baseUrl + f.filename);
@@ -62,7 +140,8 @@ app.post('/api/products', upload.array('files', 10), (req, res) => {
       name,
       price: parseFloat(price),
       offerPrice: parseFloat(offerPrice),
-      category,
+      pageType: pageType || 'Flower',
+      category: category || 'General',
       description,
       images,
       videos,
@@ -72,10 +151,12 @@ app.post('/api/products', upload.array('files', 10), (req, res) => {
     db.get('products').push(newProduct).write();
     res.json({ success: true, product: newProduct });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed' });
   }
 });
 
+// > PRODUCTS (DELETE)
 app.delete('/api/products/:id', (req, res) => {
   db.get('products').remove({ id: parseInt(req.params.id) }).write();
   res.json({ success: true });
@@ -85,9 +166,7 @@ app.delete('/api/products/:id', (req, res) => {
 app.get('/api/categories', (req, res) => res.json(db.get('categories').value()));
 app.post('/api/categories', (req, res) => {
   const { category } = req.body;
-  if (!db.get('categories').includes(category).value()) {
-    db.get('categories').push(category).write();
-  }
+  if (!db.get('categories').includes(category).value()) db.get('categories').push(category).write();
   res.json({ success: true });
 });
 app.delete('/api/categories/:name', (req, res) => {
@@ -97,21 +176,6 @@ app.delete('/api/categories/:name', (req, res) => {
 
 // > ADMINS
 app.get('/api/admins', (req, res) => res.json(db.get('admins').value()));
-app.post('/api/admins', (req, res) => {
-  const newAdmin = { id: Date.now(), ...req.body, active: true };
-  db.get('admins').push(newAdmin).write();
-  res.json({ success: true });
-});
-app.put('/api/admins/:id', (req, res) => {
-  db.get('admins').find({ id: parseInt(req.params.id) }).assign(req.body).write();
-  res.json({ success: true });
-});
-app.delete('/api/admins/:id', (req, res) => {
-  db.get('admins').remove({ id: parseInt(req.params.id) }).write();
-  res.json({ success: true });
-});
-
-// > AUTH & GATE
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   const admin = db.get('admins').find({ username, password }).value();
@@ -119,6 +183,7 @@ app.post('/api/login', (req, res) => {
   else res.status(401).json({ success: false });
 });
 
+// > GATE
 app.post('/api/gate/verify', (req, res) => {
   const { password } = req.body;
   const correct = db.get('gatePassword').value();
@@ -126,13 +191,7 @@ app.post('/api/gate/verify', (req, res) => {
   else res.status(401).json({ success: false });
 });
 
-app.post('/api/gate/update', (req, res) => {
-  const { password } = req.body;
-  db.set('gatePassword', password).write();
-  res.json({ success: true });
-});
-
-// > VIEWS
+// > STATS
 app.get('/api/views', (req, res) => {
   db.update('views', n => n + 1).write();
   res.json({ views: db.get('views').value() });

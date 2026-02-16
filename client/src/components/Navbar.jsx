@@ -1,15 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Search, Menu, X } from 'lucide-react';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  // Function to update cart count from localStorage
+  const updateCount = () => {
+    const cart = JSON.parse(localStorage.getItem('norcal_cart') || '[]');
+    setCartCount(cart.length);
+  };
+
+  useEffect(() => {
+    updateCount(); // Initial check
+    
+    // Listen for custom storage events (triggered when adding/removing items)
+    window.addEventListener('storage', updateCount);
+    
+    // Also listen for a custom event for immediate updates within the same tab
+    window.addEventListener('cartUpdated', updateCount);
+    
+    return () => {
+        window.removeEventListener('storage', updateCount);
+        window.removeEventListener('cartUpdated', updateCount);
+    };
+  }, []);
 
   return (
     <>
       <nav className="fixed top-0 w-full z-50 px-4 md:px-8 py-4 flex justify-between items-center bg-black/90 backdrop-blur-xl border-b border-[#39FF14]/20">
         
-        {/* 1. BRANDING (Logo + Name) */}
+        {/* 1. BRANDING */}
         <Link to="/" className="flex items-center gap-2 group">
           <img 
             src="/logo-nobg.png" 
@@ -26,40 +48,36 @@ const Navbar = () => {
           </div>
         </Link>
         
-        {/* 2. DESKTOP MENU (Hidden on Mobile) */}
+        {/* 2. DESKTOP MENU */}
         <div className="hidden md:flex items-center gap-8 bg-white/5 px-8 py-3 rounded-full border border-white/10">
           <Link to="/" className="nav-link">Home</Link>
-          <Link to="/shop" className="nav-link">Products</Link>
+          <Link to="/flower" className="nav-link">Flower</Link>
+          <Link to="/edibles" className="nav-link">Edibles</Link>
+          <Link to="/dispos" className="nav-link">Dispos</Link>
           <Link to="/terms" className="nav-link">Terms</Link>
         </div>
 
         {/* 3. RIGHT ICONS */}
         <div className="flex items-center gap-3 md:gap-4">
           
-          {/* --- MOBILE SEARCH BAR (Visible only on Mobile) --- */}
+          {/* Mobile Search */}
           <div className="md:hidden flex items-center bg-white/10 rounded-full px-3 py-1.5 border border-white/10 w-32 focus-within:w-40 focus-within:border-[#39FF14] transition-all">
             <Search size={14} className="text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              className="bg-transparent border-none outline-none text-white text-xs ml-2 w-full placeholder:text-gray-500"
-            />
+            <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-white text-xs ml-2 w-full placeholder:text-gray-500" />
           </div>
 
-          {/* --- DESKTOP SEARCH (Hidden on Mobile) --- */}
+          {/* Desktop Search */}
           <div className="hidden md:flex items-center bg-white/5 rounded-full px-4 py-2 border border-white/10 focus-within:border-[#39FF14] transition-colors">
             <Search size={16} className="text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              className="bg-transparent border-none outline-none text-white text-sm ml-2 w-24 focus:w-40 transition-all placeholder:text-gray-600"
-            />
+            <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none text-white text-sm ml-2 w-24 focus:w-40 transition-all placeholder:text-gray-600" />
           </div>
 
-          {/* --- CART ICON (Hidden on Mobile as requested) --- */}
+          {/* Cart Icon (Desktop) */}
           <Link to="/cart" className="relative text-white hover:text-[#39FF14] transition-colors hidden md:flex">
             <ShoppingBag size={24} />
-            <span className="absolute -top-1 -right-1 bg-[#39FF14] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+            <span className="absolute -top-1 -right-1 bg-[#39FF14] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {cartCount}
+            </span>
           </Link>
           
           {/* Mobile Menu Button */}
@@ -76,10 +94,12 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-24 px-6 md:hidden flex flex-col gap-6 animate-fade-in">
           <Link to="/" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>HOME</Link>
-          <Link to="/shop" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>PRODUCTS</Link>
-          <Link to="/terms" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>TERMS & CONDITIONS</Link>
+          <Link to="/flower" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>FLOWER</Link>
+          <Link to="/edibles" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>EDIBLES</Link>
+          <Link to="/dispos" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>DISPOS</Link>
+          <Link to="/terms" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>TERMS</Link>
           <Link to="/cart" className="text-2xl font-bold text-[#39FF14] flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-             <ShoppingBag size={24} /> CART (0)
+             <ShoppingBag size={24} /> CART ({cartCount})
           </Link>
         </div>
       )}

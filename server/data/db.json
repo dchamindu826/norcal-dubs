@@ -30,6 +30,20 @@
         "http://localhost:5000/uploads/1771048585032-382905763.mp4"
       ],
       "specialOffer": false
+    },
+    {
+      "id": 1771262747173,
+      "name": "CPure edibles",
+      "price": 150,
+      "offerPrice": 100,
+      "pageType": "Edibles",
+      "category": "General",
+      "description": "Eka parak bara dala adapan kudu wenna wadinwa kaluwa witahtrai",
+      "images": [
+        "http://localhost:5000/uploads/1771262747144-39365965.png"
+      ],
+      "videos": [],
+      "specialOffer": true
     }
   ],
   "categories": [
@@ -50,6 +64,6 @@
       "active": true
     }
   ],
-  "views": 1262,
+  "views": 1320,
   "gatePassword": "10954"
 }

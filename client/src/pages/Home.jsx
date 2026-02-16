@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getProducts, incrementView } from '../utils/api';
-import { Send, Phone, ArrowRight, ShoppingBag, Eye } from 'lucide-react';
+import { Send, Phone, ArrowRight, Eye } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import StatsCounter from '../components/StatsCounter';
@@ -18,9 +18,20 @@ const Home = () => {
     fetchData();
   }, []);
 
+  // Helper to determine the correct link based on pageType
+  const getProductLink = (product) => {
+      if (product.pageType === 'Edibles') return '/edibles';
+      if (product.pageType === 'Dispos') return '/dispos';
+      return '/flower'; // Default fallback
+  };
+
   return (
     <div className="bg-[#050505] min-h-screen text-white pb-20">
-      <Navbar />
+      {/* Navbar is handled by MainLayout in App.jsx usually, 
+          but if you need it here specifically due to routing structure, keep it. 
+          If double navbars appear, remove this line. */}
+      {/* <Navbar /> */} 
+      
       <Hero />
       <StatsCounter />
       
@@ -55,7 +66,7 @@ const Home = () => {
             <h2 className="text-4xl font-black tracking-tighter mb-2">FRESH <span className="text-[#39FF14]">DROPS</span></h2>
             <p className="text-gray-400 text-sm tracking-wide">Latest arrivals in stock</p>
           </div>
-          <Link to="/shop" className="flex items-center gap-2 text-xs font-bold bg-[#39FF14] text-black px-6 py-3 rounded-full hover:bg-white transition-all uppercase tracking-widest hover:scale-105">
+          <Link to="/flower" className="flex items-center gap-2 text-xs font-bold bg-[#39FF14] text-black px-6 py-3 rounded-full hover:bg-white transition-all uppercase tracking-widest hover:scale-105">
             View Collection <ArrowRight size={14}/>
           </Link>
         </div>
@@ -69,9 +80,14 @@ const Home = () => {
                 <div className="h-64 bg-black rounded-xl mb-4 overflow-hidden relative">
                   <img src={item.images[0] || '/logo-nobg.png'} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                     <Link to="/shop" className="bg-[#39FF14] text-black px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform">
-                        <Eye size={14} /> VIEW DETAILS
-                     </Link>
+                      {/* LINK TO CORRECT PAGE & OPEN MODAL */}
+                      <Link 
+                        to={getProductLink(item)} 
+                        state={{ selectedId: item.id }} 
+                        className="bg-[#39FF14] text-black px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform"
+                      >
+                         <Eye size={14} /> VIEW DETAILS
+                      </Link>
                   </div>
                   {item.specialOffer && <span className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg">SALE</span>}
                 </div>
@@ -94,4 +110,5 @@ const Home = () => {
     </div>
   );
 };
+
 export default Home;
