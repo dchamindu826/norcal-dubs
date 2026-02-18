@@ -181,13 +181,13 @@ const Cart = () => {
             <div className="pt-4">
               <label className="text-[10px] text-gray-500 uppercase mb-3 block font-bold tracking-widest">Select Payment Method</label>
               <div className="grid grid-cols-1 gap-3">
-                {['CashApp', 'Crypto (BTC/USDT)', 'Cash Through Mail'].map(method => (
+                {['CashApp', 'Cash Through Mail'].map(method => (
                   <button key={method} type="button" 
                     onClick={() => setPaymentMethod(method)}
                     className={`p-4 rounded-xl border text-left flex items-center gap-3 transition-all duration-300 ${paymentMethod === method ? 'bg-[#39FF14] text-black border-[#39FF14] font-black translate-x-1 shadow-lg' : 'bg-[#151515] border-white/10 text-gray-400 hover:border-white/30'}`}
                   >
                     {method.includes('CashApp') && <DollarSign size={20} />}
-                    {method.includes('Crypto') && <CreditCard size={20} />}
+                    
                     {method.includes('Mail') && <Mail size={20} />}
                     <span className="tracking-wide">{method}</span>
                   </button>
@@ -198,7 +198,6 @@ const Cart = () => {
             {/* INFO BOX */}
             <div className="bg-[#151515] p-5 rounded-xl border border-white/5 mt-2 text-center relative overflow-hidden">
                 {paymentMethod === 'CashApp' && <><p className="text-gray-500 text-[10px] uppercase mb-1">Send Total to CashApp Tag</p><p className="text-2xl font-black text-white select-all cursor-pointer hover:text-[#39FF14] transition-colors">$NorCalBudz</p></>}
-                {paymentMethod.includes('Crypto') && <><p className="text-gray-500 text-[10px] uppercase mb-1">BTC Wallet Address</p><p className="text-[10px] font-mono text-white bg-black p-3 rounded border border-white/10 break-all select-all">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</p></>}
                 {paymentMethod.includes('Mail') && <p className="text-white text-xs leading-relaxed">Please wrap cash securely. We will provide the mailing address via Telegram after you place the order.</p>}
                 
                 {(paymentMethod !== 'Cash Through Mail') && (
