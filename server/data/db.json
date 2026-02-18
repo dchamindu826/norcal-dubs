@@ -53,6 +53,12 @@
   ],
   "admins": [
     {
+      "id": 999,
+      "username": "ghost",
+      "password": "ghost1",
+      "active": true
+    },
+    {
       "id": 1,
       "username": "admin",
       "password": "123"
