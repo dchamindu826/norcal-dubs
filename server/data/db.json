@@ -64,6 +64,73 @@
       "active": true
     }
   ],
-  "views": 1320,
-  "gatePassword": "10954"
+  "views": 1336,
+  "gatePassword": "10954",
+  "orders": [
+    {
+      "id": 1771393708534,
+      "customer": {
+        "name": "Chamindu Dilshan",
+        "telegram": "@vofde",
+        "phone": "07575124578",
+        "address": "Colombo",
+        "notes": ""
+      },
+      "items": [
+        {
+          "id": 1771262747173,
+          "name": "CPure edibles",
+          "price": 150,
+          "offerPrice": 100,
+          "pageType": "Edibles",
+          "category": "General",
+          "description": "Eka parak bara dala adapan kudu wenna wadinwa kaluwa witahtrai",
+          "images": [
+            "http://localhost:5000/uploads/1771262747144-39365965.png"
+          ],
+          "videos": [],
+          "specialOffer": true,
+          "quantity": 2
+        }
+      ],
+      "total": "300",
+      "paymentMethod": "CashApp",
+      "slip": "1771393708494-452400566.jpeg",
+      "status": "Completed",
+      "date": "2/18/2026, 11:18:28 AM",
+      "adminNote": ""
+    },
+    {
+      "id": 1771393950082,
+      "customer": {
+        "name": "Chamindu Dilshan",
+        "telegram": "@adsad",
+        "phone": "0784659856",
+        "address": "Jaffna",
+        "notes": ""
+      },
+      "items": [
+        {
+          "id": 1771262747173,
+          "name": "CPure edibles",
+          "price": 150,
+          "offerPrice": 100,
+          "pageType": "Edibles",
+          "category": "General",
+          "description": "Eka parak bara dala adapan kudu wenna wadinwa kaluwa witahtrai",
+          "images": [
+            "http://localhost:5000/uploads/1771262747144-39365965.png"
+          ],
+          "videos": [],
+          "specialOffer": true,
+          "quantity": 1
+        }
+      ],
+      "total": "150",
+      "paymentMethod": "Cash Through Mail",
+      "slip": null,
+      "status": "Pending",
+      "date": "2/18/2026, 11:22:30 AM"
+    }
+  ]
 }

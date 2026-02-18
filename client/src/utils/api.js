@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-// --- UPDATE: DYNAMIC URL & EXPORT ---
-// Meka export kalama thama Cart.jsx ekata ganna puluwan
-export const API_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:5000/api'
-  : 'https://norcalbudz.com/api';
+// --- IMPORTANT: Connect directly to LIVE VPS ---
+export const API_URL = 'https://norcalbudz.com/api'; 
 
 // --- PRODUCTS ---
 export const getProducts = async () => (await axios.get(`${API_URL}/products`)).data;
@@ -31,3 +28,8 @@ export const updateGate = async (password) => axios.post(`${API_URL}/gate/update
 export const getStats = async () => (await axios.get(`${API_URL}/stats`)).data;
 export const incrementView = async () => (await axios.get(`${API_URL}/views`)).data;
 export const downloadBackup = () => window.location.href = `${API_URL}/backup`;
+
+// --- ORDERS (ADMIN) ---
+export const getOrders = async () => (await axios.get(`${API_URL}/orders`)).data;
+export const updateOrder = async (id, data) => axios.put(`${API_URL}/orders/${id}`, data);
+export const deleteOrder = async (id) => axios.delete(`${API_URL}/orders/${id}`);

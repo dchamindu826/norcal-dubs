@@ -13,8 +13,7 @@ const PORT = 5000;
 
 // --- TELEGRAM CONFIG ---
 const TELEGRAM_TOKEN = '8482307153:AAF9x88RtIWcjXSq4-a-WPpHA8vdvPfjKJg'; 
-//const ADMIN_CHAT_ID = '6037266434';
-const ADMIN_CHAT_ID ='7905655241';
+const ADMIN_CHAT_ID ='8037336557';
 
 const bot = new TelegramBot(TELEGRAM_TOKEN, { polling: false });
 
@@ -31,7 +30,8 @@ db.defaults({
   categories: ['Exotic', 'Indoor', 'Outdoor', 'Edibles'], 
   admins: [{ id: 1, username: 'admin', password: '123', active: true }], 
   gatePassword: '420',
-  views: 1250 
+  views: 1250,
+  orders: [] 
 }).write();
 
 // --- 2. MIDDLEWARE ---
@@ -51,16 +51,12 @@ const upload = multer({ storage });
 
 // --- 4. API ROUTES ---
 
-// > PLACE ORDER (UPDATED WITH SLIP & TELEGRAM PHOTO)
-// Note: We use upload.single('slip') to handle the optional payment proof
+// > PLACE ORDER (CUSTOMER)
 app.post('/api/orders', upload.single('slip'), async (req, res) => {
   try {
-    // FormData walin eddi data enne req.body eke strings widiyata.
-    // E nisa items JSON.parse karanna one.
     const { customerName, telegram, phone, address, notes, total, paymentMethod } = req.body;
     const items = JSON.parse(req.body.items || '[]');
-    
-    const slipFile = req.file; // Uploaded slip (if exists)
+    const slipFile = req.file;
 
     // 1. Save to DB
     const orderId = Date.now();
@@ -72,11 +68,11 @@ app.post('/api/orders', upload.single('slip'), async (req, res) => {
       paymentMethod,
       slip: slipFile ? slipFile.filename : null,
       status: 'Pending',
-      date: new Date().toLocaleString()
+      date: new Date().toLocaleString(),
+      adminNote: '' // Init admin note
     };
     
-    // LowDB logic to save order (optional implementation)
-    // db.get('orders').push(newOrder).write(); 
+    db.get('orders').push(newOrder).write(); 
 
     // 2. PREPARE TELEGRAM MESSAGE
     const itemString = items.map(i => `- ${i.name} ($${i.price})`).join('\n');
@@ -102,14 +98,16 @@ ${slipFile ? '✅ <b>Payment Slip Attached</b>' : '⚠️ <b>No Slip Uploaded</b
 https://t.me/${telegram.replace('@', '')}
     `;
 
-    // 3. SEND TO TELEGRAM (PHOTO OR TEXT)
-    if (slipFile) {
-        // Slip ekak thiyenawa nam Photo ekak widiyata yawanna
-        const stream = fs.createReadStream(slipFile.path);
-        await bot.sendPhoto(ADMIN_CHAT_ID, stream, { caption: message, parse_mode: 'HTML' });
-    } else {
-        // Slip nattam Text witharak yawanna
-        await bot.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: 'HTML' });
+    // 3. SEND TO TELEGRAM
+    try {
+        if (slipFile) {
+            const stream = fs.createReadStream(slipFile.path);
+            await bot.sendPhoto(ADMIN_CHAT_ID, stream, { caption: message, parse_mode: 'HTML' });
+        } else {
+            await bot.sendMessage(ADMIN_CHAT_ID, message, { parse_mode: 'HTML' });
+        }
+    } catch (e) {
+        console.error("Telegram Error", e);
     }
 
     res.json({ success: true, orderId });
@@ -118,6 +116,28 @@ https://t.me/${telegram.replace('@', '')}
     console.error("Order Error:", err);
     res.status(500).json({ error: 'Order failed' });
   }
+});
+
+// > GET ALL ORDERS (ADMIN) - MEKA ELIYATA GATHTHA
+app.get('/api/orders', (req, res) => {
+  const orders = db.get('orders').value();
+  res.json(orders);
+});
+
+// > UPDATE ORDER STATUS (ADMIN)
+app.put('/api/orders/:id', (req, res) => {
+  const { status, adminNote } = req.body;
+  db.get('orders')
+    .find({ id: parseInt(req.params.id) })
+    .assign({ status, adminNote })
+    .write();
+  res.json({ success: true });
+});
+
+// > DELETE ORDER
+app.delete('/api/orders/:id', (req, res) => {
+  db.get('orders').remove({ id: parseInt(req.params.id) }).write();
+  res.json({ success: true });
 });
 
 // > PRODUCTS (GET)
