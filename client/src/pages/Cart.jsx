@@ -197,14 +197,14 @@ const Cart = () => {
 
             {/* INFO BOX */}
             <div className="bg-[#151515] p-5 rounded-xl border border-white/5 mt-2 text-center relative overflow-hidden">
-                {paymentMethod === 'CashApp' && <><p className="text-gray-500 text-[10px] uppercase mb-1">Send Total to CashApp Tag</p><p className="text-2xl font-black text-white select-all cursor-pointer hover:text-[#39FF14] transition-colors">$NorCalBudz</p></>}
+                {paymentMethod === 'CashApp' && <><p className="text-gray-500 text-[10px] uppercase mb-1">Send Total to CashApp Tag</p><p className="text-2xl font-black text-white select-all cursor-pointer hover:text-[#39FF14] transition-colors">MendoNorcal</p></>}
                 {paymentMethod.includes('Mail') && <p className="text-white text-xs leading-relaxed">Please wrap cash securely. We will provide the mailing address via Telegram after you place the order.</p>}
                 
                 {(paymentMethod !== 'Cash Through Mail') && (
                      <div className="mt-4 bg-red-900/20 border border-red-500/30 p-3 rounded-lg flex items-start gap-3 text-left">
                         <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={16} />
-                        <p className="text-red-500 text-[10px] font-bold leading-relaxed">
-                            IMPORTANT: Do NOT write "Weed", "Drugs" or "Buds" in payment notes. Leave blank or use your name.
+                        <p className="text-red-500 text-[12px] font-bold leading-relaxed">
+                            IMPORTANT: Put "Art" as a remark.
                         </p>
                      </div>
                 )}

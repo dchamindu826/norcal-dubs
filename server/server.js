@@ -176,6 +176,50 @@ app.post('/api/products', upload.array('files', 10), (req, res) => {
   }
 });
 
+// > UPDATE PRODUCT (EDIT)
+app.put('/api/products/:id', upload.array('files', 10), (req, res) => {
+  try {
+    const { name, price, category, pageType, description, specialOffer, offerPrice } = req.body;
+    
+    // Existing URLs maintain kireema
+    let existingImages = req.body.existingImages || [];
+    let existingVideos = req.body.existingVideos || [];
+    if (typeof existingImages === 'string') existingImages = [existingImages];
+    if (typeof existingVideos === 'string') existingVideos = [existingVideos];
+
+    const files = req.files || [];
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}/uploads/`; 
+
+    const newImages = files.filter(f => f.mimetype.startsWith('image')).map(f => baseUrl + f.filename);
+    const newVideos = files.filter(f => f.mimetype.startsWith('video')).map(f => baseUrl + f.filename);
+
+    const updatedProduct = {
+      id: parseInt(req.params.id),
+      name,
+      price: parseFloat(price),
+      offerPrice: parseFloat(offerPrice || 0),
+      pageType: pageType || 'Flower',
+      category: category || 'General',
+      description,
+      images: [...existingImages, ...newImages],
+      videos: [...existingVideos, ...newVideos],
+      specialOffer: specialOffer === 'true'
+    };
+
+    db.get('products')
+      .find({ id: parseInt(req.params.id) })
+      .assign(updatedProduct)
+      .write();
+
+    res.json({ success: true, product: updatedProduct });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update' });
+  }
+});
+
 // > PRODUCTS (DELETE)
 app.delete('/api/products/:id', (req, res) => {
   db.get('products').remove({ id: parseInt(req.params.id) }).write();

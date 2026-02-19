@@ -7,6 +7,7 @@ export const API_URL = 'https://norcalbudz.com/api';
 export const getProducts = async () => (await axios.get(`${API_URL}/products`)).data;
 export const saveProduct = async (formData) => axios.post(`${API_URL}/products`, formData);
 export const deleteProduct = async (id) => axios.delete(`${API_URL}/products/${id}`);
+export const updateProduct = async (id, formData) => axios.put(`${API_URL}/products/${id}`, formData);
 
 // --- CATEGORIES ---
 export const getCategories = async () => (await axios.get(`${API_URL}/categories`)).data;

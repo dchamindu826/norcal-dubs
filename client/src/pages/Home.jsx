@@ -51,7 +51,7 @@ const Home = () => {
             <div className="bg-[#39FF14]/10 border border-[#39FF14]/30 p-6 rounded-2xl flex items-center justify-between hover:bg-[#39FF14] transition-all cursor-pointer">
               <div className="flex items-center gap-4">
                 <div className="bg-[#39FF14] text-black p-3 rounded-full group-hover:bg-black group-hover:text-[#39FF14] transition-colors"><Phone size={24} /></div>
-                <div><h3 className="text-xl font-bold text-white group-hover:text-black">Call Now</h3><p className="text-[#39FF14] text-xs uppercase font-bold group-hover:text-black/70">+1 (707) 4526706</p></div>
+                <div><h3 className="text-xl font-bold text-white group-hover:text-black">Call Now</h3><p className="text-[#39FF14] text-xs uppercase font-bold group-hover:text-black/70">+1 (707) 452-6706</p></div>
               </div>
               <ArrowRight className="text-[#39FF14] group-hover:text-black transform group-hover:translate-x-2 transition-transform" />
             </div>

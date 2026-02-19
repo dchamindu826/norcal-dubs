@@ -21,79 +21,64 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  // --- 1. CALCULATE ORDER STATS ---
-  const totalRevenue = orders
-    .filter(o => o.status !== 'Cancelled')
-    .reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0);
-  
+  const totalRevenue = orders.filter(o => o.status !== 'Cancelled').reduce((acc, curr) => acc + parseFloat(curr.total || 0), 0);
   const pendingOrders = orders.filter(o => o.status === 'Pending').length;
   const processingOrders = orders.filter(o => o.status === 'Processing').length;
   const shippedOrders = orders.filter(o => o.status === 'Shipped').length;
   const completedOrders = orders.filter(o => o.status === 'Completed').length;
   const cancelledOrders = orders.filter(o => o.status === 'Cancelled').length;
 
-  // --- 2. PREPARE CHART DATA ---
-  
-  // Data for Pie Chart
   const pieData = [
-    { name: 'Pending', value: pendingOrders, color: '#FACC15' }, // Yellow
-    { name: 'Processing', value: processingOrders, color: '#3B82F6' }, // Blue
-    { name: 'Shipped', value: shippedOrders, color: '#A855F7' }, // Purple
-    { name: 'Completed', value: completedOrders, color: '#39FF14' }, // Green
-    { name: 'Cancelled', value: cancelledOrders, color: '#EF4444' }, // Red
+    { name: 'Pending', value: pendingOrders, color: '#FACC15' },
+    { name: 'Processing', value: processingOrders, color: '#3B82F6' },
+    { name: 'Shipped', value: shippedOrders, color: '#A855F7' },
+    { name: 'Completed', value: completedOrders, color: '#39FF14' },
+    { name: 'Cancelled', value: cancelledOrders, color: '#EF4444' },
   ].filter(item => item.value > 0);
 
-  // Data for Revenue Chart (Group by Date)
-  // Note: This logic groups orders by date to show trend
   const revenueMap = {};
   orders.forEach(order => {
       if(order.status !== 'Cancelled') {
-          const date = order.date.split(',')[0]; // Extract date part
+          const date = order.date.split(',')[0];
           if(!revenueMap[date]) revenueMap[date] = 0;
           revenueMap[date] += parseFloat(order.total || 0);
       }
   });
   
-  const areaData = Object.keys(revenueMap).map(date => ({
-      name: date,
-      income: revenueMap[date]
-  })).slice(-7); // Show last 7 active days
+  const areaData = Object.keys(revenueMap).map(date => ({ name: date, income: revenueMap[date] })).slice(-7);
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-4">
         <div>
-            <h1 className="text-4xl font-black text-white mb-2">DASHBOARD</h1>
-            <p className="text-gray-500">Welcome back, Admin</p>
+            <h1 className="text-2xl sm:text-4xl font-black text-white mb-1 sm:mb-2">DASHBOARD</h1>
+            <p className="text-gray-500 text-sm sm:text-base">Welcome back, Admin</p>
         </div>
-        <div className="text-right hidden md:block">
-            <p className="text-xs text-gray-500 uppercase font-bold tracking-widest">Live Status</p>
+        <div className="text-left md:text-right">
+            <p className="text-[10px] sm:text-xs text-gray-500 uppercase font-bold tracking-widest">Live Status</p>
             <div className="flex items-center gap-2 text-[#39FF14]">
                 <div className="w-2 h-2 bg-[#39FF14] rounded-full animate-pulse"></div>
-                <span className="font-bold text-sm">System Online</span>
+                <span className="font-bold text-xs sm:text-sm">System Online</span>
             </div>
         </div>
       </div>
 
-      {/* 1. TOP STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Revenue" value={`$${totalRevenue.toLocaleString()}`} icon={<DollarSign />} color="text-[#39FF14]" bg="bg-[#39FF14]/10" />
-        <StatCard title="Total Orders" value={orders.length} icon={<Package />} color="text-blue-400" bg="bg-blue-400/10" />
-        <StatCard title="Pending" value={pendingOrders} icon={<Clock />} color="text-yellow-400" bg="bg-yellow-400/10" />
-        <StatCard title="Total Views" value={stats.views} icon={<Eye />} color="text-purple-400" bg="bg-purple-400/10" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+        <StatCard title="Revenue" value={`$${totalRevenue.toLocaleString()}`} icon={<DollarSign size={20} className="sm:w-6 sm:h-6"/>} color="text-[#39FF14]" bg="bg-[#39FF14]/10" />
+        <StatCard title="Orders" value={orders.length} icon={<Package size={20} className="sm:w-6 sm:h-6"/>} color="text-blue-400" bg="bg-blue-400/10" />
+        <StatCard title="Pending" value={pendingOrders} icon={<Clock size={20} className="sm:w-6 sm:h-6"/>} color="text-yellow-400" bg="bg-yellow-400/10" />
+        <StatCard title="Views" value={stats.views} icon={<Eye size={20} className="sm:w-6 sm:h-6"/>} color="text-purple-400" bg="bg-purple-400/10" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
         
-        {/* 2. REVENUE TREND (AREA CHART) */}
-        <div className="lg:col-span-2 bg-[#111] p-6 rounded-3xl border border-white/10 relative overflow-hidden">
-            <div className="flex justify-between items-center mb-6 relative z-10">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                    <TrendingUp size={20} className="text-[#39FF14]"/> Revenue Trend
+        <div className="lg:col-span-2 bg-[#111] p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 relative overflow-hidden">
+            <div className="flex justify-between items-center mb-4 sm:mb-6 relative z-10">
+                <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <TrendingUp size={18} className="text-[#39FF14] sm:w-5 sm:h-5"/> Revenue Trend
                 </h3>
             </div>
-            
-            <div className="h-[300px] w-full relative z-10">
+            <div className="h-[200px] sm:h-[300px] w-full relative z-10 -ml-4 sm:ml-0">
                 {areaData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={areaData}>
@@ -105,80 +90,59 @@ const Dashboard = () => {
                             </defs>
                             <XAxis dataKey="name" stroke="#555" tick={{fontSize: 10}} tickLine={false} axisLine={false} />
                             <YAxis stroke="#555" tick={{fontSize: 10}} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`}/>
-                            <Tooltip 
-                                contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }}
-                                itemStyle={{ color: '#39FF14' }}
-                            />
-                            <Area type="monotone" dataKey="income" stroke="#39FF14" strokeWidth={3} fillOpacity={1} fill="url(#colorIncome)" />
+                            <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} itemStyle={{ color: '#39FF14' }} />
+                            <Area type="monotone" dataKey="income" stroke="#39FF14" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
                         </AreaChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-gray-600">
-                        <p>No revenue data yet.</p>
-                    </div>
+                    <div className="h-full flex flex-col items-center justify-center text-gray-600 text-sm">No revenue data yet.</div>
                 )}
             </div>
         </div>
 
-        {/* 3. ORDER STATUS (PIE CHART) */}
-        <div className="bg-[#111] p-6 rounded-3xl border border-white/10">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <PieChart size={20} className="text-blue-400"/> Order Distribution
+        <div className="bg-[#111] p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2">
+                <PieChart size={18} className="text-blue-400 sm:w-5 sm:h-5"/> Order Dist.
             </h3>
-            
-            <div className="h-[250px] w-full relative">
+            <div className="h-[200px] sm:h-[250px] w-full relative">
                 {pieData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <RePie>
-                            <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={80}
-                                paddingAngle={5}
-                                dataKey="value"
-                                stroke="none"
-                            >
-                                {pieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
+                            <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={5} dataKey="value" stroke="none">
+                                {pieData.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
                             </Pie>
                             <Tooltip contentStyle={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px' }} />
-                            <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{fontSize: '10px'}}/>
                         </RePie>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-gray-600">No orders yet.</div>
+                    <div className="h-full flex items-center justify-center text-gray-600 text-sm">No orders yet.</div>
                 )}
-                {/* Center Text Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-8">
                     <div className="text-center">
-                        <span className="text-3xl font-black text-white">{orders.length}</span>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Total</p>
+                        <span className="text-2xl sm:text-3xl font-black text-white">{orders.length}</span>
+                        <p className="text-[8px] sm:text-[10px] text-gray-500 uppercase tracking-widest">Total</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        {/* 4. INVENTORY STATS ROW */}
-        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="flex items-center justify-between p-6 bg-[#111] rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                <div className="flex items-center gap-4">
-                    <div className="bg-white/5 p-3 rounded-xl text-white"><ShoppingBag size={24}/></div>
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+             <div className="flex items-center justify-between p-4 sm:p-6 bg-[#111] rounded-xl sm:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="bg-white/5 p-2 sm:p-3 rounded-lg sm:rounded-xl text-white"><ShoppingBag size={20} className="sm:w-6 sm:h-6"/></div>
                     <div>
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Active Products</p>
-                        <h4 className="text-2xl font-black text-white">{stats.products}</h4>
+                        <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">Active Products</p>
+                        <h4 className="text-xl sm:text-2xl font-black text-white">{stats.products}</h4>
                     </div>
                 </div>
             </div>
-
-            <div className="flex items-center justify-between p-6 bg-[#111] rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                <div className="flex items-center gap-4">
-                    <div className="bg-white/5 p-3 rounded-xl text-white"><Users size={24}/></div>
+            <div className="flex items-center justify-between p-4 sm:p-6 bg-[#111] rounded-xl sm:rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="bg-white/5 p-2 sm:p-3 rounded-lg sm:rounded-xl text-white"><Users size={20} className="sm:w-6 sm:h-6"/></div>
                     <div>
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">System Admins</p>
-                        <h4 className="text-2xl font-black text-white">{stats.admins}</h4>
+                        <p className="text-gray-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">System Admins</p>
+                        <h4 className="text-xl sm:text-2xl font-black text-white">{stats.admins}</h4>
                     </div>
                 </div>
             </div>
@@ -189,14 +153,13 @@ const Dashboard = () => {
   );
 };
 
-// Helper Components
 const StatCard = ({ title, value, icon, color, bg }) => (
-  <div className="bg-[#111] p-6 rounded-3xl border border-white/10 flex items-center justify-between hover:border-white/30 transition-all hover:scale-[1.02] cursor-default shadow-lg">
+  <div className="bg-[#111] p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:border-white/30 transition-all hover:scale-[1.02] shadow-lg gap-2 sm:gap-0">
     <div>
-      <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">{title}</p>
-      <h3 className={`text-4xl font-black ${color} tracking-tighter`}>{value}</h3>
+      <p className="text-gray-500 text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-1 sm:mb-2">{title}</p>
+      <h3 className={`text-2xl sm:text-4xl font-black ${color} tracking-tighter truncate w-full`}>{value}</h3>
     </div>
-    <div className={`p-4 rounded-2xl ${bg} ${color}`}>{icon}</div>
+    <div className={`p-2 sm:p-4 rounded-xl sm:rounded-2xl ${bg} ${color} self-end sm:self-auto`}>{icon}</div>
   </div>
 );
 
