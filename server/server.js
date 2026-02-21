@@ -31,7 +31,8 @@ db.defaults({
   admins: [{ id: 1, username: 'admin', password: '123', active: true }], 
   gatePassword: '420',
   views: 1250,
-  orders: [] 
+  orders: [],
+  reviews: []
 }).write();
 
 // --- 2. MIDDLEWARE ---
@@ -278,5 +279,34 @@ app.get('/api/backup', async (req, res) => {
   archive.directory('./uploads/', 'uploads');
   await archive.finalize();
 });
+
+
+// > REVIEWS SYSTEM
+app.get('/api/reviews', (req, res) => res.json(db.get('reviews').value()));
+
+app.post('/api/reviews', (req, res) => {
+  const newReview = { 
+    id: Date.now(), 
+    ...req.body, 
+    status: 'Pending', // Default pending
+    date: new Date().toLocaleDateString() 
+  };
+  db.get('reviews').push(newReview).write();
+  res.json({ success: true });
+});
+
+app.put('/api/reviews/:id', (req, res) => {
+  db.get('reviews').find({ id: parseInt(req.params.id) }).assign(req.body).write();
+  res.json({ success: true });
+});
+
+app.delete('/api/reviews/:id', (req, res) => {
+  db.get('reviews').remove({ id: parseInt(req.params.id) }).write();
+  res.json({ success: true });
+});
+
+
+
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

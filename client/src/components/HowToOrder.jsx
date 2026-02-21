@@ -18,7 +18,7 @@ const HowToOrder = () => {
     {
       icon: <CreditCard size={18} className="text-black" />,
       title: "PAYMENT",
-      desc: "Pay via CashApp, Crypto, or Mail."
+      desc: "Pay via CashApp or Mail."
     },
     {
       icon: <MessageCircle size={18} className="text-black" />,

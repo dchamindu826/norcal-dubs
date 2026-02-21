@@ -21,6 +21,7 @@ import CategoryManager from './pages/AdminPanel/CategoryManager';
 import GateSettings from './pages/AdminPanel/GateSettings';
 import AdminManager from './pages/AdminPanel/AdminManager';
 import OrderManager from './pages/AdminPanel/OrderManager';
+import ReviewManager from './pages/AdminPanel/ReviewManager';
 
 // --- LAYOUT HELPER (Makes sure Navbar & HowToOrder appear everywhere) ---
 const MainLayout = ({ children }) => (
@@ -103,6 +104,7 @@ function App() {
            <Route path="users" element={<AdminManager />} /> 
            <Route path="orders" element={<OrderManager />} />
            <Route path="settings" element={<GateSettings />} />
+           <Route path="reviews" element={<ReviewManager />} />
         </Route>
 
         {/* --- PUBLIC ZONE --- */}

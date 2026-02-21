@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getProducts, incrementView } from '../utils/api';
-import { Send, Phone, ArrowRight, Eye } from 'lucide-react';
-import Navbar from '../components/Navbar';
+import { Send, Phone, ArrowRight, Eye, MapPin } from 'lucide-react';
 import Hero from '../components/Hero';
 import StatsCounter from '../components/StatsCounter';
+import Testimonials from '../components/Testimonials'; // <--- IMPORT THIS
 import { Link } from 'react-router-dom';
 
 const Home = () => {
@@ -18,25 +18,30 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // Helper to determine the correct link based on pageType
   const getProductLink = (product) => {
       if (product.pageType === 'Edibles') return '/edibles';
       if (product.pageType === 'Dispos') return '/dispos';
-      return '/flower'; // Default fallback
+      return '/flower'; 
   };
 
   return (
     <div className="bg-[#050505] min-h-screen text-white pb-20">
-      {/* Navbar is handled by MainLayout in App.jsx usually, 
-          but if you need it here specifically due to routing structure, keep it. 
-          If double navbars appear, remove this line. */}
-      {/* <Navbar /> */} 
       
       <Hero />
       <StatsCounter />
       
+      {/* NEW TAGLINE SECTION */}
+      <div className="container mx-auto px-6 mt-12 mb-8 text-center">
+         <div className="inline-flex items-center gap-2 bg-[#111] border border-white/10 px-6 py-3 rounded-full shadow-[0_0_20px_rgba(57,255,20,0.05)]">
+             <MapPin size={16} className="text-[#39FF14]" />
+             <p className="text-gray-300 text-xs md:text-sm font-bold tracking-widest uppercase">
+                 Flower From The Emerald Triangle In Northern California
+             </p>
+         </div>
+      </div>
+
       {/* Action Bar */}
-      <div className="container mx-auto px-6 mt-16 mb-16">
+      <div className="container mx-auto px-6 mb-16">
         <div className="flex flex-col md:flex-row gap-6 justify-center">
           <a href="https://t.me/NorCalBudz707" target="_blank" rel="noreferrer" className="flex-1 group">
             <div className="bg-[#0088cc]/10 border border-[#0088cc]/30 p-6 rounded-2xl flex items-center justify-between hover:bg-[#0088cc] transition-all cursor-pointer">
@@ -60,7 +65,7 @@ const Home = () => {
       </div>
 
       {/* RECENT DROPS */}
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 mb-20">
         <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-10 border-b border-white/10 pb-6 gap-6">
           <div className="text-center md:text-left">
             <h2 className="text-4xl font-black tracking-tighter mb-2">FRESH <span className="text-[#39FF14]">DROPS</span></h2>
@@ -80,7 +85,6 @@ const Home = () => {
                 <div className="h-64 bg-black rounded-xl mb-4 overflow-hidden relative">
                   <img src={item.images[0] || '/logo-nobg.png'} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      {/* LINK TO CORRECT PAGE & OPEN MODAL */}
                       <Link 
                         to={getProductLink(item)} 
                         state={{ selectedId: item.id }} 
@@ -107,6 +111,10 @@ const Home = () => {
           </div>
         )}
       </div>
+
+      {/* NEW TESTIMONIALS SECTION */}
+      <Testimonials />
+
     </div>
   );
 };

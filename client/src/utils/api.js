@@ -34,3 +34,9 @@ export const downloadBackup = () => window.location.href = `${API_URL}/backup`;
 export const getOrders = async () => (await axios.get(`${API_URL}/orders`)).data;
 export const updateOrder = async (id, data) => axios.put(`${API_URL}/orders/${id}`, data);
 export const deleteOrder = async (id) => axios.delete(`${API_URL}/orders/${id}`);
+
+// --- REVIEWS ---
+export const getReviews = async () => (await axios.get(`${API_URL}/reviews`)).data;
+export const addReview = async (data) => axios.post(`${API_URL}/reviews`, data);
+export const updateReview = async (id, data) => axios.put(`${API_URL}/reviews/${id}`, data);
+export const deleteReview = async (id) => axios.delete(`${API_URL}/reviews/${id}`);

@@ -197,7 +197,7 @@ const Cart = () => {
 
             {/* INFO BOX */}
             <div className="bg-[#151515] p-5 rounded-xl border border-white/5 mt-2 text-center relative overflow-hidden">
-                {paymentMethod === 'CashApp' && <><p className="text-gray-500 text-[10px] uppercase mb-1">Send Total to CashApp Tag</p><p className="text-2xl font-black text-white select-all cursor-pointer hover:text-[#39FF14] transition-colors">MendoNorcal</p></>}
+                {paymentMethod === 'CashApp' && <><p className="text-gray-500 text-[10px] uppercase mb-1">Send Total to CashApp Tag</p><p className="text-2xl font-black text-white select-all cursor-pointer hover:text-[#39FF14] transition-colors">$MendoNorCal</p></>}
                 {paymentMethod.includes('Mail') && <p className="text-white text-xs leading-relaxed">Please wrap cash securely. We will provide the mailing address via Telegram after you place the order.</p>}
                 
                 {(paymentMethod !== 'Cash Through Mail') && (

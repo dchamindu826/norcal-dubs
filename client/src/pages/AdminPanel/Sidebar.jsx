@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, List, Users, Settings, LogOut, Package } from 'lucide-react';
+// මෙන්න මෙතනට MessageSquareQuote එකතු කළා 👇
+import { LayoutDashboard, ShoppingBag, List, Users, Settings, LogOut, Package, MessageSquareQuote } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Categories', path: '/admin/categories', icon: <List size={20} /> },
     { name: 'Admins', path: '/admin/users', icon: <Users size={20} /> },
     { name: 'Gate Settings', path: '/admin/settings', icon: <Settings size={20} /> },
+    { name: 'Reviews', path: '/admin/reviews', icon: <MessageSquareQuote size={20} /> },
   ];
 
   return (
