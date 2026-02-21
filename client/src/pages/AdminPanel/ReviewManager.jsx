@@ -56,7 +56,7 @@ const ReviewManager = () => {
                             <td className="p-4 whitespace-nowrap">{r.date}</td>
                             <td className="p-4 font-bold text-white">{r.name}</td>
                             <td className="p-4 flex gap-1 text-yellow-400">
-                                {[...Array(r.rating)].map((_, i) => <Star key={i} size={14} className="fill-yellow-400"/>)}
+                                {[...Array(r.rating || 5)].map((_, i) => <Star key={i} size={14} className="fill-yellow-400"/>)}
                             </td>
                             <td className="p-4 italic text-xs">{r.text}</td>
                             <td className="p-4">
@@ -80,14 +80,43 @@ const ReviewManager = () => {
 
       {/* EDIT MODAL */}
       {editingReview && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 animate-fade-in">
               <div className="bg-[#111] border border-white/10 p-6 rounded-2xl w-full max-w-md">
-                  <h3 className="text-white font-bold mb-4">Edit Review</h3>
-                  <input value={editingReview.name} onChange={e => setEditingReview({...editingReview, name: e.target.value})} className="w-full bg-black border border-white/20 text-white p-2 rounded mb-3 outline-none" />
-                  <textarea value={editingReview.text} onChange={e => setEditingReview({...editingReview, text: e.target.value})} className="w-full bg-black border border-white/20 text-white p-2 rounded h-24 mb-3 outline-none" />
-                  <div className="flex gap-2 justify-end">
-                      <button onClick={() => setEditingReview(null)} className="px-4 py-2 text-gray-500">Cancel</button>
-                      <button onClick={handleSaveEdit} className="px-4 py-2 bg-[#39FF14] text-black font-bold rounded">Save</button>
+                  <h3 className="text-white font-bold mb-4 text-xl">Edit Review</h3>
+                  
+                  {/* Edit Name */}
+                  <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Customer Name</label>
+                  <input 
+                      value={editingReview.name} 
+                      onChange={e => setEditingReview({...editingReview, name: e.target.value})} 
+                      className="w-full bg-black border border-white/20 text-white p-3 rounded-lg mb-4 outline-none focus:border-[#39FF14]" 
+                  />
+
+                  {/* Edit Rating (NEW) */}
+                  <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Rating</label>
+                  <div className="flex gap-2 mb-4 bg-black p-3 rounded-lg border border-white/20">
+                      {[1, 2, 3, 4, 5].map(star => (
+                          <Star 
+                              key={star} 
+                              size={24} 
+                              onClick={() => setEditingReview({...editingReview, rating: star})}
+                              className={`cursor-pointer transition-all ${star <= editingReview.rating ? 'text-yellow-400 fill-yellow-400 scale-110' : 'text-gray-600 hover:text-yellow-400/50'}`} 
+                          />
+                      ))}
+                  </div>
+
+                  {/* Edit Text */}
+                  <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Feedback</label>
+                  <textarea 
+                      value={editingReview.text} 
+                      onChange={e => setEditingReview({...editingReview, text: e.target.value})} 
+                      className="w-full bg-black border border-white/20 text-white p-3 rounded-lg h-24 mb-6 outline-none focus:border-[#39FF14] resize-none" 
+                  />
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 justify-end">
+                      <button onClick={() => setEditingReview(null)} className="px-5 py-2 text-gray-400 hover:text-white transition-colors font-bold">Cancel</button>
+                      <button onClick={handleSaveEdit} className="px-6 py-2 bg-[#39FF14] text-black font-black rounded-lg hover:bg-white transition-colors">Save Changes</button>
                   </div>
               </div>
           </div>

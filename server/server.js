@@ -32,7 +32,8 @@ db.defaults({
   gatePassword: '420',
   views: 1250,
   orders: [],
-  reviews: []
+  reviews: [],
+  music: []
 }).write();
 
 // --- 2. MIDDLEWARE ---
@@ -305,7 +306,27 @@ app.delete('/api/reviews/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// > MUSIC SYSTEM
+app.get('/api/music', (req, res) => res.json(db.get('music').value() || []));
 
+app.post('/api/music', upload.single('audio'), (req, res) => {
+  try {
+    const newMusic = {
+      id: Date.now(),
+      name: req.body.name,
+      fileName: req.file.filename // Multer එකෙන් save වෙන audio ෆයිල් එක
+    };
+    db.get('music').push(newMusic).write();
+    res.json({ success: true, music: newMusic });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to upload music' });
+  }
+});
+
+app.delete('/api/music/:id', (req, res) => {
+  db.get('music').remove({ id: parseInt(req.params.id) }).write();
+  res.json({ success: true });
+});
 
 
 

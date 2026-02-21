@@ -40,3 +40,8 @@ export const getReviews = async () => (await axios.get(`${API_URL}/reviews`)).da
 export const addReview = async (data) => axios.post(`${API_URL}/reviews`, data);
 export const updateReview = async (id, data) => axios.put(`${API_URL}/reviews/${id}`, data);
 export const deleteReview = async (id) => axios.delete(`${API_URL}/reviews/${id}`);
+
+// --- MUSIC ---
+export const getMusic = async () => (await axios.get(`${API_URL}/music`)).data;
+export const addMusic = async (formData) => axios.post(`${API_URL}/music`, formData);
+export const deleteMusic = async (id) => axios.delete(`${API_URL}/music/${id}`);

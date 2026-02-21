@@ -1,30 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Star, Quote, X, Send } from 'lucide-react';
 import { getReviews, addReview } from '../utils/api';
 
 const Testimonials = () => {
   const [reviews, setReviews] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', rating: 5, text: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const sliderRef = useRef(null);
 
   useEffect(() => {
     const fetchReviews = async () => {
       const allReviews = await getReviews();
-      // Only show approved reviews
       setReviews(allReviews.filter(r => r.status === 'Approved'));
     };
     fetchReviews();
   }, []);
 
-  // Auto Slider
+  // Auto Slider Logic
   useEffect(() => {
-    if (reviews.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % reviews.length);
-    }, 5000); // Slides every 5 seconds
-    return () => clearInterval(interval);
+    const slider = sliderRef.current;
+    if (!slider || reviews.length === 0) return;
+    
+    let scrollAmount = 0;
+    const scrollStep = 1;
+    const delay = 30;
+
+    const scrollInterval = setInterval(() => {
+        if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
+            slider.scrollLeft = 0; // Reset to start
+        } else {
+            slider.scrollLeft += scrollStep;
+        }
+    }, delay);
+
+    return () => clearInterval(scrollInterval);
   }, [reviews]);
 
   const handleSubmit = async (e) => {
@@ -44,7 +54,7 @@ const Testimonials = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 mb-20">
+    <div className="container mx-auto px-6 mb-20 overflow-hidden">
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-white/10 pb-6 gap-6">
         <div className="text-center md:text-left">
           <h2 className="text-4xl font-black tracking-tighter mb-2">CLIENT <span className="text-[#39FF14]">REVIEWS</span></h2>
@@ -58,36 +68,30 @@ const Testimonials = () => {
         </button>
       </div>
 
-      {/* REVIEW SLIDER */}
+      {/* HORIZONTAL CARDS SLIDER */}
       {reviews.length > 0 ? (
-          <div className="bg-[#111] p-8 md:p-12 rounded-3xl border border-white/5 relative overflow-hidden text-center max-w-4xl mx-auto min-h-[250px] flex flex-col justify-center">
-              <Quote className="absolute top-4 left-4 md:top-8 md:left-8 text-white/5" size={80} />
-              
-              <div className="animate-fade-in transition-all duration-500">
-                  <div className="flex justify-center gap-1 mb-6">
-                      {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={20} className={i < reviews[currentIndex].rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"} />
-                      ))}
+          <div 
+              ref={sliderRef}
+              className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide py-4"
+              style={{ scrollBehavior: 'smooth', msOverflowStyle: 'none', scrollbarWidth: 'none' }}
+          >
+              {reviews.map((review, idx) => (
+                  <div key={idx} className="min-w-[300px] md:min-w-[350px] snap-center bg-[#111] p-6 rounded-3xl border border-white/10 hover:border-[#39FF14]/50 transition-colors flex flex-col relative group">
+                      <Quote className="absolute top-4 right-4 text-white/5 group-hover:text-[#39FF14]/10 transition-colors" size={40} />
+                      <div className="flex gap-1 mb-4">
+                          {[...Array(5)].map((_, i) => (
+                              <Star key={i} size={16} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"} />
+                          ))}
+                      </div>
+                      <p className="text-sm text-gray-300 italic mb-6 flex-1 leading-relaxed">
+                          "{review.text}"
+                      </p>
+                      <div className="border-t border-white/10 pt-4 mt-auto">
+                          <h4 className="text-white font-bold text-sm tracking-wider">{review.name}</h4>
+                          <span className="text-[10px] text-[#39FF14] uppercase font-bold tracking-widest">Verified Buyer</span>
+                      </div>
                   </div>
-                  <p className="text-lg md:text-2xl font-medium text-gray-300 italic mb-8 leading-relaxed">
-                      "{reviews[currentIndex].text}"
-                  </p>
-                  <div>
-                      <h4 className="text-white font-bold tracking-wider">{reviews[currentIndex].name}</h4>
-                      <span className="text-xs text-gray-500 uppercase">{reviews[currentIndex].date} • Verified Buyer</span>
-                  </div>
-              </div>
-
-              {/* Dots */}
-              <div className="flex justify-center gap-2 mt-8">
-                  {reviews.map((_, idx) => (
-                      <button 
-                          key={idx} 
-                          onClick={() => setCurrentIndex(idx)}
-                          className={`w-2 h-2 rounded-full transition-all ${idx === currentIndex ? 'bg-[#39FF14] w-6' : 'bg-white/20'}`}
-                      />
-                  ))}
-              </div>
+              ))}
           </div>
       ) : (
           <div className="text-center py-10 text-gray-600 border border-dashed border-white/10 rounded-2xl">
@@ -95,38 +99,29 @@ const Testimonials = () => {
           </div>
       )}
 
-      {/* SUBMIT REVIEW MODAL */}
+      {/* SUBMIT REVIEW MODAL (Same as before) */}
       {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/90 backdrop-blur-sm animate-fade-in">
               <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-3xl p-6 relative">
                   <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X size={20}/></button>
                   <h3 className="text-2xl font-black text-white mb-2 uppercase italic tracking-tighter">Leave a <span className="text-[#39FF14]">Review</span></h3>
-                  <p className="text-xs text-gray-500 mb-6">Your feedback will be reviewed by our team.</p>
                   
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-4 mt-6">
                       <div>
-                          <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Your Name / Telegram ID</label>
-                          <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-[#111] border border-white/10 text-white rounded-xl p-3 outline-none focus:border-[#39FF14]" placeholder="e.g. John Doe" />
+                          <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-[#111] border border-white/10 text-white rounded-xl p-3 outline-none focus:border-[#39FF14]" placeholder="Your Name" />
                       </div>
                       <div>
-                          <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Rating</label>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 bg-[#111] border border-white/10 p-3 rounded-xl justify-center">
                               {[1,2,3,4,5].map(star => (
-                                  <Star 
-                                      key={star} 
-                                      size={28} 
-                                      onClick={() => setFormData({...formData, rating: star})}
-                                      className={`cursor-pointer transition-all ${star <= formData.rating ? 'text-yellow-400 fill-yellow-400 scale-110' : 'text-gray-600 hover:text-yellow-400/50'}`} 
-                                  />
+                                  <Star key={star} size={28} onClick={() => setFormData({...formData, rating: star})} className={`cursor-pointer transition-all ${star <= formData.rating ? 'text-yellow-400 fill-yellow-400 scale-110' : 'text-gray-600'}`} />
                               ))}
                           </div>
                       </div>
                       <div>
-                          <label className="text-xs text-gray-400 uppercase font-bold mb-1 block">Your Feedback</label>
-                          <textarea required value={formData.text} onChange={e => setFormData({...formData, text: e.target.value})} className="w-full bg-[#111] border border-white/10 text-white rounded-xl p-3 outline-none focus:border-[#39FF14] h-24 resize-none" placeholder="How was the quality and service?" />
+                          <textarea required value={formData.text} onChange={e => setFormData({...formData, text: e.target.value})} className="w-full bg-[#111] border border-white/10 text-white rounded-xl p-3 outline-none focus:border-[#39FF14] h-24 resize-none" placeholder="Your Feedback" />
                       </div>
                       <button disabled={isSubmitting} type="submit" className="w-full bg-[#39FF14] text-black font-black py-4 rounded-xl hover:bg-white transition-colors flex items-center justify-center gap-2">
-                          {isSubmitting ? 'SUBMITTING...' : <><Send size={18}/> SUBMIT REVIEW</>}
+                          {isSubmitting ? 'SUBMITTING...' : <><Send size={18}/> SUBMIT</>}
                       </button>
                   </form>
               </div>
