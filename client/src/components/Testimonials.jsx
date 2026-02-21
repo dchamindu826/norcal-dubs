@@ -7,35 +7,47 @@ const Testimonials = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', rating: 5, text: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const sliderRef = useRef(null);
+  
+  // Auto-slide එක pause කරන්න අවශ්‍ය state එක
+  const [isPaused, setIsPaused] = useState(false); 
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     const fetchReviews = async () => {
-      const allReviews = await getReviews();
-      setReviews(allReviews.filter(r => r.status === 'Approved'));
+      try {
+        const allReviews = await getReviews();
+        setReviews(allReviews.filter(r => r.status === 'Approved'));
+      } catch (error) {
+        console.error("Failed to fetch reviews", error);
+      }
     };
     fetchReviews();
   }, []);
 
-  // Auto Slider Logic
+  // --- IMPROVED AUTO SLIDE LOGIC ---
   useEffect(() => {
-    const slider = sliderRef.current;
-    if (!slider || reviews.length === 0) return;
-    
-    let scrollAmount = 0;
-    const scrollStep = 1;
-    const delay = 30;
+    const el = scrollRef.current;
+    // reviews නැත්නම් හෝ user hover/touch කරලා (paused) නම් slide වෙන්න එපා
+    if (!el || reviews.length === 0 || isPaused) return;
 
-    const scrollInterval = setInterval(() => {
-        if (slider.scrollLeft >= slider.scrollWidth - slider.clientWidth) {
-            slider.scrollLeft = 0; // Reset to start
-        } else {
-            slider.scrollLeft += scrollStep;
-        }
-    }, delay);
+    const slideTimer = setInterval(() => {
+      const firstCard = el.children[0];
+      if (!firstCard) return;
 
-    return () => clearInterval(scrollInterval);
-  }, [reviews]);
+      // Card එකක width එක සහ Tailwind gap-6 (24px) එකතුව
+      const cardWidth = firstCard.offsetWidth;
+      const scrollAmount = cardWidth + 24; 
+
+      // අන්තිම හරියටම ඇවිත්ද කියලා බලලා ආයෙත් මුලට යවනවා
+      if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 10) {
+        el.scrollTo({ left: 0, behavior: 'smooth' }); 
+      } else {
+        el.scrollBy({ left: scrollAmount, behavior: 'smooth' }); 
+      }
+    }, 3000); // තත්පර 3න් 3ට slide වෙනවා (අවශ්‍ය නම් වෙනස් කරගන්න)
+
+    return () => clearInterval(slideTimer);
+  }, [reviews, isPaused]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,26 +80,37 @@ const Testimonials = () => {
         </button>
       </div>
 
-      {/* HORIZONTAL CARDS SLIDER */}
+      {/* HORIZONTAL AUTO-SLIDING CARDS */}
       {reviews.length > 0 ? (
           <div 
-              ref={sliderRef}
-              className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide py-4"
-              style={{ scrollBehavior: 'smooth', msOverflowStyle: 'none', scrollbarWidth: 'none' }}
+              ref={scrollRef}
+              // Mouse එක හෝ touch එක තියෙද්දි slider එක pause කරන්න
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
+              className="flex gap-6 overflow-x-auto snap-x snap-mandatory py-4 [&::-webkit-scrollbar]:hidden"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
               {reviews.map((review, idx) => (
-                  <div key={idx} className="min-w-[300px] md:min-w-[350px] snap-center bg-[#111] p-6 rounded-3xl border border-white/10 hover:border-[#39FF14]/50 transition-colors flex flex-col relative group">
-                      <Quote className="absolute top-4 right-4 text-white/5 group-hover:text-[#39FF14]/10 transition-colors" size={40} />
-                      <div className="flex gap-1 mb-4">
+                  <div 
+                      key={idx} 
+                      className="min-w-[320px] max-w-[320px] md:min-w-[400px] md:max-w-[400px] snap-center bg-[#111] p-8 rounded-3xl border border-white/10 hover:border-[#39FF14]/50 transition-colors flex flex-col relative group flex-shrink-0 shadow-xl cursor-grab active:cursor-grabbing"
+                  >
+                      <Quote className="absolute top-6 right-6 text-white/5 group-hover:text-[#39FF14]/10 transition-colors" size={48} />
+                      
+                      <div className="flex gap-1 mb-6">
                           {[...Array(5)].map((_, i) => (
-                              <Star key={i} size={16} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-600"} />
+                              <Star key={i} size={18} className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-700"} />
                           ))}
                       </div>
-                      <p className="text-sm text-gray-300 italic mb-6 flex-1 leading-relaxed">
+                      
+                      <p className="text-gray-300 font-medium italic mb-8 flex-1 leading-relaxed">
                           "{review.text}"
                       </p>
+                      
                       <div className="border-t border-white/10 pt-4 mt-auto">
-                          <h4 className="text-white font-bold text-sm tracking-wider">{review.name}</h4>
+                          <h4 className="text-white font-black tracking-wider text-lg">{review.name}</h4>
                           <span className="text-[10px] text-[#39FF14] uppercase font-bold tracking-widest">Verified Buyer</span>
                       </div>
                   </div>
@@ -99,7 +122,7 @@ const Testimonials = () => {
           </div>
       )}
 
-      {/* SUBMIT REVIEW MODAL (Same as before) */}
+      {/* SUBMIT REVIEW MODAL */}
       {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/90 backdrop-blur-sm animate-fade-in">
               <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-3xl p-6 relative">
