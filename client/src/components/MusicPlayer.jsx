@@ -7,37 +7,79 @@ const MusicPlayer = () => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Audio object එක පාලනය කරන්න ref එකක් පාවිච්චි කරනවා
   const audioRef = useRef(new Audio());
 
+  // 1. Database එකෙන් සින්දු ටික ගන්නවා
   useEffect(() => {
     const fetchSongs = async () => {
-      const data = await getMusic();
-      setSongs(data);
-      if (data.length > 0) setCurrentSong(data[0]); // Default song
+      try {
+        const data = await getMusic();
+        setSongs(data);
+        if (data.length > 0) {
+          setCurrentSong(data[0]); // මුලින්ම තියෙන සින්දුව default විදිහට දානවා
+        }
+      } catch (error) {
+        console.error("Failed to fetch music:", error);
+      }
     };
     fetchSongs();
   }, []);
 
+  // 2. සින්දුවක් ඉවර උනාම ඊළඟ එක play වෙන්න හදනවා
+  useEffect(() => {
+    const audio = audioRef.current;
+    
+    const handleEnded = () => {
+      const currentIndex = songs.findIndex(s => s.id === currentSong?.id);
+      if (currentIndex !== -1 && currentIndex + 1 < songs.length) {
+        setCurrentSong(songs[currentIndex + 1]);
+        setIsPlaying(true);
+      } else {
+        setIsPlaying(false); // අන්තිම සින්දුව නම් නතර කරනවා
+      }
+    };
+
+    audio.addEventListener('ended', handleEnded);
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, [currentSong, songs]);
+
+  // 3. Current Song එක මාරු වෙද්දි Audio Source එක update කරනවා
   useEffect(() => {
     if (currentSong) {
-      // Setup audio URL for VPS
-      audioRef.current.src = `https://norcalbudz.com/uploads/${currentSong.fileName}`;
+      // Backend එකේ file path එකට ගැලපෙන්න හදන්න. (file හෝ fileName)
+      const fileName = currentSong.fileName || currentSong.file;
+      audioRef.current.src = `https://norcalbudz.com/uploads/${fileName}`;
+      
       if (isPlaying) {
-          audioRef.current.play().catch(e => console.log("Auto-play prevented", e));
+        audioRef.current.play().catch(e => {
+          console.log("Browser auto-play blocked it. User needs to interact first.", e);
+          setIsPlaying(false);
+        });
       }
     }
   }, [currentSong]);
 
-  const togglePlay = () => {
+  // 4. Play/Pause state එක මාරු වෙද්දි සින්දුව පාලනය කරනවා
+  useEffect(() => {
     if (isPlaying) {
-      audioRef.current.pause();
+      audioRef.current.play().catch(e => {
+        console.log("Play prevented by browser:", e);
+        setIsPlaying(false);
+      });
     } else {
-      audioRef.current.play();
+      audioRef.current.pause();
     }
+  }, [isPlaying]);
+
+  const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // If Admin hasn't uploaded any music, hide the player completely
+  // Admin සින්දු මුකුත් දාලා නැත්නම් Player එක පෙන්නන්නේ නෑ
   if (songs.length === 0) return null; 
 
   return (
@@ -71,9 +113,9 @@ const MusicPlayer = () => {
 
           {/* Song List */}
           <div className="space-y-2 mb-6 max-h-32 overflow-y-auto scrollbar-hide border-b border-white/10 pb-4">
-              {songs.map(song => (
+              {songs.map((song, index) => (
                   <div 
-                      key={song.id} 
+                      key={song.id || index} 
                       onClick={() => { 
                           setCurrentSong(song); 
                           setIsPlaying(true); 
@@ -87,8 +129,8 @@ const MusicPlayer = () => {
 
           {/* Controls */}
           <div className="flex items-center justify-between">
-              <div className="text-[#39FF14] text-xs font-bold truncate max-w-[150px] animate-pulse">
-                  {isPlaying ? 'Now Playing: ' + currentSong?.name : 'Paused'}
+              <div className="text-[#39FF14] text-xs font-bold truncate max-w-[140px] animate-pulse">
+                  {isPlaying ? 'Playing: ' + currentSong?.name : 'Paused'}
               </div>
               <button onClick={togglePlay} className="bg-[#39FF14] text-black p-3 rounded-full hover:bg-white hover:scale-110 transition-all shadow-[0_0_15px_rgba(57,255,20,0.4)]">
                   {isPlaying ? <Pause size={18} fill="currentColor"/> : <Play size={18} fill="currentColor"/>}
