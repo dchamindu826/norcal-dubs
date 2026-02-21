@@ -55,7 +55,7 @@ const Testimonials = () => {
     setIsSubmitting(true);
     try {
         await addReview(formData);
-        alert("Review submitted! Waiting for admin approval.");
+        alert("Review submitted!");
         setIsModalOpen(false);
         setFormData({ name: '', rating: 5, text: '' });
     } catch (error) {
