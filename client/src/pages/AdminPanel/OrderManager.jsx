@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getOrders, updateOrder } from '../../utils/api';
-import { Search, Eye, X, Settings } from 'lucide-react';
+// deleteOrder api function එක import කරගත්තා
+import { getOrders, updateOrder, deleteOrder } from '../../utils/api'; 
+// Trash2 icon එක import කරගත්තා delete button එකට
+import { Search, Eye, X, Settings, Trash2 } from 'lucide-react'; 
 
 const OrderManager = () => {
   const [orders, setOrders] = useState([]);
@@ -51,6 +53,25 @@ const OrderManager = () => {
         setSelectedOrder(null);
     } catch (error) { alert("Failed to update order"); } 
     finally { setLoading(false); }
+  };
+
+  // --- DELETE ORDER FUNCTION ---
+  const handleDeleteOrder = async (orderId) => {
+    if (window.confirm("Are you sure you want to delete this order? This action cannot be undone.")) {
+        setLoading(true);
+        try {
+            await deleteOrder(orderId);
+            alert("Order Deleted Successfully!");
+            fetchOrders(); // List එක refresh කරනවා
+            if (selectedOrder && selectedOrder.id === orderId) {
+                setSelectedOrder(null); // Modal එක open වෙලා තිබ්බොත් close කරනවා
+            }
+        } catch (error) {
+            alert("Failed to delete order");
+        } finally {
+            setLoading(false);
+        }
+    }
   };
 
   return (
@@ -111,9 +132,14 @@ const OrderManager = () => {
                             <td className="p-3 sm:p-4 font-bold text-[#39FF14]">${order.total}</td>
                             <td className="p-3 sm:p-4"><span className={`px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[10px] font-bold border uppercase ${getStatusColor(order.status)}`}>{order.status}</span></td>
                             <td className="p-3 sm:p-4 text-right">
-                                <button onClick={() => setSelectedOrder(order)} className="bg-white text-black p-1.5 sm:p-2 rounded-lg hover:bg-[#39FF14] transition-colors">
-                                    <Eye size={14} className="sm:w-4 sm:h-4"/>
-                                </button>
+                                <div className="flex items-center justify-end gap-2">
+                                    <button onClick={() => setSelectedOrder(order)} className="bg-white text-black p-1.5 sm:p-2 rounded-lg hover:bg-[#39FF14] transition-colors">
+                                        <Eye size={14} className="sm:w-4 sm:h-4"/>
+                                    </button>
+                                    <button onClick={() => handleDeleteOrder(order.id)} className="bg-red-500/10 text-red-500 border border-red-500/20 p-1.5 sm:p-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors" title="Delete Order">
+                                        <Trash2 size={14} className="sm:w-4 sm:h-4"/>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     ))}
@@ -124,13 +150,19 @@ const OrderManager = () => {
       </div>
 
       {selectedOrder && (
-          <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} onUpdate={handleUpdateStatus} loading={loading} />
+          <OrderDetailsModal 
+              order={selectedOrder} 
+              onClose={() => setSelectedOrder(null)} 
+              onUpdate={handleUpdateStatus} 
+              onDelete={handleDeleteOrder} // Delete function එක Modal එකටත් pass කළා
+              loading={loading} 
+          />
       )}
     </div>
   );
 };
 
-const OrderDetailsModal = ({ order, onClose, onUpdate, loading }) => {
+const OrderDetailsModal = ({ order, onClose, onUpdate, onDelete, loading }) => {
     const [status, setStatus] = useState(order.status);
     const [note, setNote] = useState(order.adminNote || '');
 
@@ -246,6 +278,15 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, loading }) => {
                         className="w-full bg-[#39FF14] text-black font-black py-3 sm:py-4 rounded-xl hover:bg-white transition-colors text-xs sm:text-base"
                     >
                         {loading ? 'SAVING...' : 'UPDATE ORDER'}
+                    </button>
+
+                    {/* Modal එක ඇතුලෙත් Delete Button එක දැම්මා */}
+                    <button 
+                        onClick={() => onDelete(order.id)} 
+                        disabled={loading}
+                        className="w-full mt-3 bg-red-500/10 border border-red-500/20 text-red-500 font-black py-3 sm:py-4 rounded-xl hover:bg-red-500 hover:text-white transition-colors text-xs sm:text-base flex items-center justify-center gap-2"
+                    >
+                        <Trash2 size={16} /> {loading ? 'DELETING...' : 'DELETE ORDER'}
                     </button>
                 </div>
             </div>

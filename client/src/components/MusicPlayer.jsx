@@ -8,8 +8,18 @@ const MusicPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   
-  // Audio object එක පාලනය කරන්න ref එකක් පාවිච්චි කරනවා
   const audioRef = useRef(new Audio());
+
+  // Component එක අයින් වෙද්දි (unmount) background සද්දෙත් නවත්තලා දානවා (Double Play Fix)
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+      }
+    };
+  }, []);
 
   // 1. Database එකෙන් සින්දු ටික ගන්නවා
   useEffect(() => {
@@ -18,7 +28,7 @@ const MusicPlayer = () => {
         const data = await getMusic();
         setSongs(data);
         if (data.length > 0) {
-          setCurrentSong(data[0]); // මුලින්ම තියෙන සින්දුව default විදිහට දානවා
+          setCurrentSong(data[0]); 
         }
       } catch (error) {
         console.error("Failed to fetch music:", error);
@@ -37,7 +47,7 @@ const MusicPlayer = () => {
         setCurrentSong(songs[currentIndex + 1]);
         setIsPlaying(true);
       } else {
-        setIsPlaying(false); // අන්තිම සින්දුව නම් නතර කරනවා
+        setIsPlaying(false); 
       }
     };
 
@@ -50,13 +60,12 @@ const MusicPlayer = () => {
   // 3. Current Song එක මාරු වෙද්දි Audio Source එක update කරනවා
   useEffect(() => {
     if (currentSong) {
-      // Backend එකේ file path එකට ගැලපෙන්න හදන්න. (file හෝ fileName)
       const fileName = currentSong.fileName || currentSong.file;
       audioRef.current.src = `https://norcalbudz.com/uploads/${fileName}`;
       
       if (isPlaying) {
         audioRef.current.play().catch(e => {
-          console.log("Browser auto-play blocked it. User needs to interact first.", e);
+          console.log("Browser auto-play blocked it.", e);
           setIsPlaying(false);
         });
       }
@@ -79,13 +88,11 @@ const MusicPlayer = () => {
     setIsPlaying(!isPlaying);
   };
 
-  // Admin සින්දු මුකුත් දාලා නැත්නම් Player එක පෙන්නන්නේ නෑ
   if (songs.length === 0) return null; 
 
   return (
     <div className="fixed bottom-6 left-6 z-[60]">
       
-      {/* Mini Player Button (When Closed) */}
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
@@ -101,7 +108,6 @@ const MusicPlayer = () => {
         </button>
       )}
 
-      {/* Expanded Player (When Open) */}
       {isOpen && (
         <div className="bg-[#0a0a0a] border border-[#39FF14]/30 w-72 rounded-2xl p-5 shadow-2xl animate-fade-in relative">
           <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><X size={18}/></button>
@@ -111,7 +117,6 @@ const MusicPlayer = () => {
               <h4 className="text-white text-sm font-black uppercase tracking-widest">Select Vibe</h4>
           </div>
 
-          {/* Song List */}
           <div className="space-y-2 mb-6 max-h-32 overflow-y-auto scrollbar-hide border-b border-white/10 pb-4">
               {songs.map((song, index) => (
                   <div 
@@ -127,7 +132,6 @@ const MusicPlayer = () => {
               ))}
           </div>
 
-          {/* Controls */}
           <div className="flex items-center justify-between">
               <div className="text-[#39FF14] text-xs font-bold truncate max-w-[140px] animate-pulse">
                   {isPlaying ? 'Playing: ' + currentSong?.name : 'Paused'}

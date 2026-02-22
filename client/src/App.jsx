@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 // Components
 import Navbar from './components/Navbar';
 import HowToOrder from './components/HowToOrder';
+import MusicPlayer from './components/MusicPlayer'; // <-- MusicPlayer එක Import කළා
 
 // Pages
 import Home from './pages/Home';
-import CategoryPage from './pages/CategoryPage'; // <-- IMPORTANT: Make sure you have this file
+import CategoryPage from './pages/CategoryPage';
 import Gate from './pages/Gate';
 import Cart from './pages/Cart';
-import Terms from './pages/Terms'; // <-- New Terms Page
+import Terms from './pages/Terms';
 
 // Admin Imports
 import AdminLogin from './pages/AdminLogin';
@@ -24,14 +25,22 @@ import OrderManager from './pages/AdminPanel/OrderManager';
 import ReviewManager from './pages/AdminPanel/ReviewManager';
 import MusicManager from './pages/AdminPanel/MusicManager';
 
-// --- LAYOUT HELPER (Makes sure Navbar & HowToOrder appear everywhere) ---
+// --- LAYOUT HELPER ---
 const MainLayout = ({ children }) => (
   <>
     <Navbar />
     {children}
-    <HowToOrder /> {/* Floating Button on all main pages */}
+    <HowToOrder />
   </>
 );
+
+// --- GLOBAL MUSIC PLAYER WRAPPER ---
+// මේකෙන් කරන්නේ Admin Pages වලදි විතරක් Player එක hide කරන එකයි. අනිත් හැමතැනම play වෙනවා.
+const GlobalPlayer = () => {
+  const location = useLocation();
+  if (location.pathname.startsWith('/admin')) return null;
+  return <MusicPlayer />;
+};
 
 function App() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -111,7 +120,6 @@ function App() {
 
         {/* --- PUBLIC ZONE --- */}
         
-        {/* 1. HOME (Wrapped in MainLayout now) */}
         <Route path="/" element={
           <PublicGuard>
             <MainLayout>
@@ -120,7 +128,6 @@ function App() {
           </PublicGuard>
         } />
 
-        {/* 2. CATEGORY PAGES (Flower, Edibles, Dispos) */}
         <Route path="/flower" element={
           <PublicGuard>
             <MainLayout>
@@ -145,7 +152,6 @@ function App() {
           </PublicGuard>
         } />
 
-        {/* 3. CART & TERMS */}
         <Route path="/cart" element={
             <PublicGuard>
                 <MainLayout>
@@ -162,10 +168,13 @@ function App() {
           </PublicGuard>
         } />
 
-        {/* 4. CATCH ALL */}
         <Route path="*" element={<Navigate to="/" replace />} />
         
       </Routes>
+
+      {/* Routes වලින් එළියේ Global Player එක දැම්මම Page මාරු උනත් සින්දුව නවතින්නේ නෑ! */}
+      {isUnlocked && <GlobalPlayer />}
+
     </Router>
   );
 }
