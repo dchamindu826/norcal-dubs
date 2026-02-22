@@ -100,7 +100,7 @@ const Hero = () => {
         </AnimatePresence>
 
         {/* CTA Button (Static) */}
-        <Link to="/shop">
+        <Link to="/flower">
   <motion.button
     whileHover={{ scale: 1.05, backgroundColor: "#39FF14", color: "#000" }}
     whileTap={{ scale: 0.95 }}
