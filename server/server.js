@@ -71,7 +71,7 @@ app.post('/api/orders', upload.single('slip'), async (req, res) => {
       slip: slipFile ? slipFile.filename : null,
       status: 'Pending',
       date: new Date().toLocaleString(),
-      adminNote: '' // Init admin note
+      adminNote: '' 
     };
     
     db.get('orders').push(newOrder).write(); 
@@ -120,7 +120,7 @@ https://t.me/${telegram.replace('@', '')}
   }
 });
 
-// > GET ALL ORDERS (ADMIN) - MEKA ELIYATA GATHTHA
+// > GET ALL ORDERS (ADMIN)
 app.get('/api/orders', (req, res) => {
   const orders = db.get('orders').value();
   res.json(orders);
@@ -150,9 +150,9 @@ app.post('/api/products', upload.array('files', 10), (req, res) => {
   try {
     const { name, price, category, pageType, description, specialOffer, offerPrice } = req.body;
     const files = req.files || [];
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const baseUrl = `${protocol}://${host}/uploads/`; 
+    
+    // --- FIXED: Always use Live Domain for image URLs ---
+    const baseUrl = 'https://norcalbudz.com/uploads/'; 
 
     const images = files.filter(f => f.mimetype.startsWith('image')).map(f => baseUrl + f.filename);
     const videos = files.filter(f => f.mimetype.startsWith('video')).map(f => baseUrl + f.filename);
@@ -183,16 +183,15 @@ app.put('/api/products/:id', upload.array('files', 10), (req, res) => {
   try {
     const { name, price, category, pageType, description, specialOffer, offerPrice } = req.body;
     
-    // Existing URLs maintain kireema
     let existingImages = req.body.existingImages || [];
     let existingVideos = req.body.existingVideos || [];
     if (typeof existingImages === 'string') existingImages = [existingImages];
     if (typeof existingVideos === 'string') existingVideos = [existingVideos];
 
     const files = req.files || [];
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const baseUrl = `${protocol}://${host}/uploads/`; 
+    
+    // --- FIXED: Always use Live Domain for image URLs ---
+    const baseUrl = 'https://norcalbudz.com/uploads/'; 
 
     const newImages = files.filter(f => f.mimetype.startsWith('image')).map(f => baseUrl + f.filename);
     const newVideos = files.filter(f => f.mimetype.startsWith('video')).map(f => baseUrl + f.filename);
@@ -327,7 +326,5 @@ app.delete('/api/music/:id', (req, res) => {
   db.get('music').remove({ id: parseInt(req.params.id) }).write();
   res.json({ success: true });
 });
-
-
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
