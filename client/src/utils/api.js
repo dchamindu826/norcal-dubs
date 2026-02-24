@@ -1,26 +1,11 @@
 import axios from 'axios';
 
-// Localhost එකේද, Live Server එකේද කියලා Auto අඳුරගන්නවා
-export const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:5000/api' 
-  : 'https://norcalbudz.com/api';
-
-// --- HELPER FUNCTION: පරණ Database එකේ තියෙන Localhost ලින්ක් ඔටෝම Live ලින්ක් වලට හරවනවා ---
-const fixUrls = (item) => {
-  if (item.images) {
-    item.images = item.images.map(url => url.replace('http://localhost:5000', 'https://norcalbudz.com'));
-  }
-  if (item.videos) {
-    item.videos = item.videos.map(url => url.replace('http://localhost:5000', 'https://norcalbudz.com'));
-  }
-  return item;
-};
+// --- IMPORTANT: Connect directly to LIVE VPS ---
+export const API_URL = 'https://norcalbudz.com/api'; 
+//export const API_URL = 'http://localhost:5000/api';
 
 // --- PRODUCTS ---
-export const getProducts = async () => {
-    const data = (await axios.get(`${API_URL}/products`)).data;
-    return data.map(fixUrls); // Load වෙද්දිම ලින්ක් ටික හදලා යවනවා
-};
+export const getProducts = async () => (await axios.get(`${API_URL}/products`)).data;
 export const saveProduct = async (formData) => axios.post(`${API_URL}/products`, formData);
 export const deleteProduct = async (id) => axios.delete(`${API_URL}/products/${id}`);
 export const updateProduct = async (id, formData) => axios.put(`${API_URL}/products/${id}`, formData);
@@ -47,16 +32,7 @@ export const incrementView = async () => (await axios.get(`${API_URL}/views`)).d
 export const downloadBackup = () => window.location.href = `${API_URL}/backup`;
 
 // --- ORDERS (ADMIN) ---
-export const getOrders = async () => {
-    const data = (await axios.get(`${API_URL}/orders`)).data;
-    // Order එකේ තියෙන slip එකේ ලින්ක් එකත් හදනවා
-    return data.map(order => {
-        if(order.slip && typeof order.slip === 'string') {
-            order.slip = order.slip.replace('http://localhost:5000', 'https://norcalbudz.com');
-        }
-        return order;
-    });
-};
+export const getOrders = async () => (await axios.get(`${API_URL}/orders`)).data;
 export const updateOrder = async (id, data) => axios.put(`${API_URL}/orders/${id}`, data);
 export const deleteOrder = async (id) => axios.delete(`${API_URL}/orders/${id}`);
 
