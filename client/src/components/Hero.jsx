@@ -8,6 +8,7 @@ import hero1 from '../assets/hero1.jpeg'; // .jpg nemei .jpeg
 import hero2 from '../assets/hero2.jpeg'; // .jpg nemei .jpeg
 import hero3 from '../assets/hero3.jpeg'; // .jpg nemei .jpeg
 import hero4 from '../assets/hero4.jpg';  // Meka hari (.jpg ma thiyanna)
+
 const Hero = () => {
   // Slide Data (Image + Text)
   const slides = [
@@ -100,18 +101,19 @@ const Hero = () => {
         </AnimatePresence>
 
         {/* CTA Button (Static) */}
-        <Link to="/flower">
-  <motion.button
-    whileHover={{ scale: 1.05, backgroundColor: "#39FF14", color: "#000" }}
-    whileTap={{ scale: 0.95 }}
-    className="group relative px-8 py-4 bg-transparent border border-[#39FF14] text-[#39FF14] rounded-full font-bold uppercase tracking-widest transition-all duration-300 overflow-hidden"
-  >
-    <span className="relative z-10 flex items-center gap-2">
-      View Collection <ArrowRight size={18} />
-    </span>
-    <div className="absolute inset-0 bg-[#39FF14] translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0"></div>
-  </motion.button>
-</Link>
+        {/* Typo eka hadala to="/collection" kiyala damma */}
+        <Link to="/collection">
+          <motion.button
+            whileHover={{ scale: 1.05, backgroundColor: "#39FF14", color: "#000" }}
+            whileTap={{ scale: 0.95 }}
+            className="group relative px-8 py-4 bg-transparent border border-[#39FF14] text-[#39FF14] rounded-full font-bold uppercase tracking-widest transition-all duration-300 overflow-hidden"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              View Collection <ArrowRight size={18} />
+            </span>
+            <div className="absolute inset-0 bg-[#39FF14] translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-0"></div>
+          </motion.button>
+        </Link>
 
       </div>
 

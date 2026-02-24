@@ -48,12 +48,10 @@ const Navbar = () => {
           </div>
         </Link>
         
-        {/* 2. DESKTOP MENU */}
+        {/* 2. DESKTOP MENU - (Flower, Edibles, Dispos අයින් කරලා Collection දැම්මා) */}
         <div className="hidden md:flex items-center gap-8 bg-white/5 px-8 py-3 rounded-full border border-white/10">
           <Link to="/" className="nav-link">Home</Link>
-          <Link to="/flower" className="nav-link">Flower</Link>
-          <Link to="/edibles" className="nav-link">Edibles</Link>
-          <Link to="/dispos" className="nav-link">Dispos</Link>
+          <Link to="/collection" className="nav-link">Collection</Link>
           <Link to="/terms" className="nav-link">Terms</Link>
         </div>
 
@@ -90,13 +88,11 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* MOBILE MENU OVERLAY */}
+      {/* MOBILE MENU OVERLAY - (Flower, Edibles, Dispos අයින් කරලා Collection දැම්මා) */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-24 px-6 md:hidden flex flex-col gap-6 animate-fade-in">
           <Link to="/" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>HOME</Link>
-          <Link to="/flower" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>FLOWER</Link>
-          <Link to="/edibles" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>EDIBLES</Link>
-          <Link to="/dispos" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>DISPOS</Link>
+          <Link to="/collection" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>COLLECTION</Link>
           <Link to="/terms" className="text-2xl font-bold text-white hover:text-[#39FF14] border-b border-white/10 pb-4" onClick={() => setIsMobileMenuOpen(false)}>TERMS</Link>
           <Link to="/cart" className="text-2xl font-bold text-[#39FF14] flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
              <ShoppingBag size={24} /> CART ({cartCount})

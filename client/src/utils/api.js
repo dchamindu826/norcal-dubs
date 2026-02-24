@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // --- IMPORTANT: Connect directly to LIVE VPS ---
 export const API_URL = 'https://norcalbudz.com/api'; 
+//export const API_URL = 'http://localhost:5000/api';
 
 // --- PRODUCTS ---
 export const getProducts = async () => (await axios.get(`${API_URL}/products`)).data;

@@ -134,7 +134,7 @@ const Cart = () => {
           </div>
         </div>
 
-        {/* RIGHT: CHECKOUT FORM (Updated CSS) */}
+        {/* RIGHT: CHECKOUT FORM */}
         <div className="bg-[#0a0a0a] p-8 rounded-3xl border border-white/10 shadow-2xl h-fit relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#39FF14] to-transparent opacity-50"></div>
           
@@ -144,7 +144,6 @@ const Cart = () => {
           
           <form onSubmit={handleSubmit} className="space-y-5">
             
-            {/* Form Fields with Better Styling */}
             <div className="group">
               <label className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mb-1 block group-focus-within:text-[#39FF14] transition-colors">Full Name</label>
               <input required className="w-full bg-[#151515] border border-white/10 p-4 rounded-xl text-white focus:border-[#39FF14] outline-none transition-all placeholder:text-gray-700" placeholder="Enter your full name"
@@ -156,7 +155,6 @@ const Cart = () => {
               <input required placeholder="@username" className="w-full bg-[#151515] border border-white/10 p-4 rounded-xl text-[#39FF14] focus:border-[#39FF14] outline-none transition-all placeholder:text-gray-700 font-medium" 
                 onChange={e => setFormData({...formData, telegram: e.target.value})} />
               
-              {/* Telegram Helper Text */}
               <div className="mt-2 flex items-start gap-2 bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
                  <div className="bg-blue-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shrink-0">?</div>
                  <p className="text-[10px] text-gray-400 leading-tight">
@@ -179,6 +177,15 @@ const Cart = () => {
 
             {/* Payment Method Selection */}
             <div className="pt-4">
+              
+              {/* --- NEW WARNING MESSAGE FOR LARGE ORDERS --- */}
+              <div className="mb-4 bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-lg flex items-start gap-3 text-left">
+                 <AlertTriangle className="text-yellow-500 shrink-0 mt-0.5" size={16} />
+                 <p className="text-yellow-500 text-[11px] font-bold leading-relaxed uppercase tracking-wide">
+                     Large Orders Of $3000 or more need to be mailed, we will provide you with a guide on how to securely send funds via mail, please message us on telegram
+                 </p>
+              </div>
+
               <label className="text-[10px] text-gray-500 uppercase mb-3 block font-bold tracking-widest">Select Payment Method</label>
               <div className="grid grid-cols-1 gap-3">
                 {['CashApp', 'Cash Through Mail'].map(method => (
@@ -187,7 +194,6 @@ const Cart = () => {
                     className={`p-4 rounded-xl border text-left flex items-center gap-3 transition-all duration-300 ${paymentMethod === method ? 'bg-[#39FF14] text-black border-[#39FF14] font-black translate-x-1 shadow-lg' : 'bg-[#151515] border-white/10 text-gray-400 hover:border-white/30'}`}
                   >
                     {method.includes('CashApp') && <DollarSign size={20} />}
-                    
                     {method.includes('Mail') && <Mail size={20} />}
                     <span className="tracking-wide">{method}</span>
                   </button>

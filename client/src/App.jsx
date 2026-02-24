@@ -4,14 +4,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 // Components
 import Navbar from './components/Navbar';
 import HowToOrder from './components/HowToOrder';
-import MusicPlayer from './components/MusicPlayer'; // <-- MusicPlayer එක Import කළා
+import MusicPlayer from './components/MusicPlayer'; 
 
 // Pages
 import Home from './pages/Home';
-import CategoryPage from './pages/CategoryPage';
 import Gate from './pages/Gate';
 import Cart from './pages/Cart';
 import Terms from './pages/Terms';
+import Collection from './pages/Collection'; // <-- අලුත් Collection Page එක
 
 // Admin Imports
 import AdminLogin from './pages/AdminLogin';
@@ -35,7 +35,6 @@ const MainLayout = ({ children }) => (
 );
 
 // --- GLOBAL MUSIC PLAYER WRAPPER ---
-// මේකෙන් කරන්නේ Admin Pages වලදි විතරක් Player එක hide කරන එකයි. අනිත් හැමතැනම play වෙනවා.
 const GlobalPlayer = () => {
   const location = useLocation();
   if (location.pathname.startsWith('/admin')) return null;
@@ -128,26 +127,11 @@ function App() {
           </PublicGuard>
         } />
 
-        <Route path="/flower" element={
+        {/* --- අලුත් COLLECTION ROUTE එක (පරණ 3 වෙනුවට මේක තියෙන්නේ) --- */}
+        <Route path="/collection" element={
           <PublicGuard>
             <MainLayout>
-              <CategoryPage pageType="Flower" />
-            </MainLayout>
-          </PublicGuard>
-        } />
-
-        <Route path="/edibles" element={
-          <PublicGuard>
-            <MainLayout>
-              <CategoryPage pageType="Edibles" />
-            </MainLayout>
-          </PublicGuard>
-        } />
-
-        <Route path="/dispos" element={
-          <PublicGuard>
-            <MainLayout>
-              <CategoryPage pageType="Dispos" />
+              <Collection />
             </MainLayout>
           </PublicGuard>
         } />
@@ -172,7 +156,7 @@ function App() {
         
       </Routes>
 
-      {/* Routes වලින් එළියේ Global Player එක දැම්මම Page මාරු උනත් සින්දුව නවතින්නේ නෑ! */}
+      {/* Routes වලින් එළියේ Global Player එක */}
       {isUnlocked && <GlobalPlayer />}
 
     </Router>

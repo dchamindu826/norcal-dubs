@@ -9,9 +9,10 @@ const ProductManager = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   
+  // pageType එක state එකෙන් අයින් කළා
   const [formData, setFormData] = useState({
     id: null, name: '', price: '', offerPrice: '', 
-    pageType: '', category: '', 
+    category: '', 
     description: '', images: [], videos: [], specialOffer: false
   });
 
@@ -36,11 +37,9 @@ const ProductManager = () => {
         name: product.name,
         price: product.price,
         offerPrice: product.offerPrice || '',
-        pageType: product.pageType,
         category: product.category || '',
         description: product.description || '',
         specialOffer: product.specialOffer || false,
-        // Keep existing URLs loaded in preview format
         images: product.images.map(url => ({ url, preview: url })),
         videos: product.videos.map(url => ({ url, preview: url }))
     });
@@ -49,8 +48,9 @@ const ProductManager = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.price || !formData.pageType) {
-        return alert("Name, Price and Page Type (Flower/Edibles/Dispos) are required!");
+    // Validate කරන්නේ Name සහ Price විතරයි
+    if (!formData.name || !formData.price) {
+        return alert("Name and Price are required!");
     }
     setLoading(true);
 
@@ -59,12 +59,10 @@ const ProductManager = () => {
         data.append('name', formData.name);
         data.append('price', formData.price);
         data.append('offerPrice', formData.offerPrice || 0);
-        data.append('pageType', formData.pageType); 
         data.append('category', formData.category || ''); 
         data.append('description', formData.description || '');
         data.append('specialOffer', formData.specialOffer);
 
-        // Separate existing URLs and New Files
         formData.images.forEach(img => { 
             if (img.file) data.append('files', img.file); 
             else if (img.url) data.append('existingImages', img.url);
@@ -74,7 +72,6 @@ const ProductManager = () => {
             else if (vid.url) data.append('existingVideos', vid.url);
         });
 
-        // Use Update API if ID exists, else Save API
         if (formData.id) {
             await updateProduct(formData.id, data);
         } else {
@@ -92,7 +89,7 @@ const ProductManager = () => {
 
   const closeModal = () => { 
       setShowForm(false); 
-      setFormData({ id: null, name: '', price: '', offerPrice: '', pageType: '', category: '', description: '', images: [], videos: [], specialOffer: false }); 
+      setFormData({ id: null, name: '', price: '', offerPrice: '', category: '', description: '', images: [], videos: [], specialOffer: false }); 
   };
 
   const handleImageUpload = (e) => {
@@ -125,13 +122,11 @@ const ProductManager = () => {
               <div className="truncate">
                 <h3 className="font-bold text-sm sm:text-lg truncate">{p.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                    <span className="bg-[#39FF14]/10 text-[#39FF14] px-2 py-0.5 rounded text-[8px] sm:text-[10px] font-bold uppercase">{p.pageType}</span>
                     <span className="text-gray-400 text-xs sm:text-sm font-mono">${p.price}</span>
                 </div>
               </div>
             </div>
             
-            {/* ACTION BUTTONS (EDIT & DELETE) */}
             <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                 <button onClick={() => handleEdit(p)} className="p-2 sm:p-3 text-blue-400 bg-blue-500/10 hover:bg-blue-500 hover:text-white transition-colors rounded-lg">
                     <Edit size={16} className="sm:w-5 sm:h-5"/>
@@ -148,31 +143,16 @@ const ProductManager = () => {
       {showForm && (
         <div className="pm-overlay">
           <div className="pm-modal">
-            {/* Dynamic Title */}
             <div className="pm-header"><span className="pm-title">{formData.id ? 'EDIT DROP' : 'NEW DROP'}</span><button onClick={closeModal} className="pm-close-btn"><X size={24} className="sm:w-7 sm:h-7"/></button></div>
             <div className="pm-body">
               
-              <div className="pm-group">
-                  <label className="pm-label text-[#39FF14]">SELECT PAGE (REQUIRED)</label>
-                  <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                      {['Flower', 'Edibles', 'Dispos'].map(type => (
-                          <button 
-                            key={type}
-                            type="button"
-                            onClick={() => setFormData({...formData, pageType: type})}
-                            className={`py-2 sm:py-3 rounded-lg sm:rounded-xl font-bold border transition-all text-xs sm:text-sm ${formData.pageType === type ? 'bg-[#39FF14] text-black border-[#39FF14]' : 'bg-black text-gray-500 border-white/10 hover:border-white'}`}
-                          >
-                              {type}
-                          </button>
-                      ))}
-                  </div>
-              </div>
+              {/* Type Selection Button Area Removed as Requested */}
 
               <div className="pm-grid-2">
                 <div className="pm-group"><label className="pm-label">Product Name</label><input className="pm-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Blue Dream" /></div>
                 
                 <div className="pm-group">
-                    <label className="pm-label">Sub-Category (Optional)</label>
+                    <label className="pm-label">Category</label>
                     <select className="pm-select" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                         <option value="">None</option>
                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -207,7 +187,6 @@ const ProductManager = () => {
             </div>
             <div className="pm-footer">
                 <button onClick={closeModal} className="text-gray-400 font-bold py-3 sm:py-0 text-sm sm:text-base hover:text-white transition-colors">CANCEL</button>
-                {/* Dynamic Button Text */}
                 <button onClick={handleSave} className="pm-btn-save" disabled={loading}>{loading ? 'SAVING...' : (formData.id ? 'UPDATE PRODUCT' : 'SAVE PRODUCT')}</button>
             </div>
           </div>

@@ -70,7 +70,7 @@
       "active": true
     }
   ],
-  "views": 1336,
+  "views": 1338,
   "gatePassword": "10954",
   "orders": [
     {
@@ -137,6 +137,40 @@
       "slip": null,
       "status": "Pending",
       "date": "2/18/2026, 11:22:30 AM"
+    },
+    {
+      "id": 1771830374280,
+      "customer": {
+        "name": "dasdas",
+        "telegram": "sdasda",
+        "phone": "5987984",
+        "address": "asda",
+        "notes": ""
+      },
+      "items": [
+        {
+          "id": 1771789235003,
+          "name": "Wholemelt 2g (Phase 4)",
+          "price": 1700,
+          "offerPrice": 0,
+          "pageType": "Dispos",
+          "category": "Dispos",
+          "description": "100 To A Box ",
+          "images": [
+            "http://norcalbudz.com/uploads/1771789235002-117224127.jpg"
+          ],
+          "videos": [],
+          "specialOffer": false,
+          "cartId": 1771829991913,
+          "quantity": 1
+        }
+      ],
+      "total": "1700",
+      "paymentMethod": "Cash Through Mail",
+      "slip": null,
+      "status": "Pending",
+      "date": "2/23/2026, 12:36:14 PM",
+      "adminNote": ""
     }
   ],
   "reviews": [],
