@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts } from '../utils/api';
+import { getProducts, getCategories } from '../utils/api'; 
 import { Eye, Search, Filter, X, ShoppingBag, Check, Play } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -10,16 +10,15 @@ const Collection = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   
+  const [categories, setCategories] = useState(['All']); 
+  
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [activeMedia, setActiveMedia] = useState(null); // <-- Main screen eke penna one image/video eka
+  const [activeMedia, setActiveMedia] = useState(null);
   const [addedToCart, setAddedToCart] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const categories = ['All', 'Flower', 'Edibles', 'Dispos'];
-
-  // Modal eka open karanakota main media eka set karana function eka
   const openProductModal = (product) => {
       setSelectedProduct(product);
       if (product.images && product.images.length > 0) {
@@ -33,12 +32,16 @@ const Collection = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const fetchProducts = async () => {
+    const fetchProductsAndCategories = async () => {
       try {
         const allProducts = await getProducts();
+        const allCategories = await getCategories(); 
+
         const reversedProducts = allProducts.reverse();
         setProducts(reversedProducts);
         setFilteredProducts(reversedProducts);
+        
+        setCategories(['All', ...allCategories]);
 
         if (location.state && location.state.selectedId) {
             const productToOpen = reversedProducts.find(p => p.id === location.state.selectedId);
@@ -46,25 +49,26 @@ const Collection = () => {
         }
 
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+    fetchProductsAndCategories();
   }, [location.state]);
 
+  // මෙතන තමයි වෙනස් කරේ - Strictly filter by category only
   useEffect(() => {
     let result = products;
 
     if (activeTab !== 'All') {
-      result = result.filter(p => p.pageType === activeTab || p.category === activeTab);
+      result = result.filter(p => p.category === activeTab);
     }
 
     if (searchQuery) {
       result = result.filter(p => 
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
@@ -159,7 +163,7 @@ const Collection = () => {
                   
                   <div className="flex justify-between items-center mb-4">
                       <p className="text-[9px] md:text-[10px] text-gray-500 uppercase tracking-widest font-bold">{item.category}</p>
-                      <span className="text-[8px] md:text-[9px] bg-white/5 text-gray-400 px-2 py-1 rounded md:rounded-md uppercase font-bold">{item.pageType}</span>
+                      {item.pageType && <span className="text-[8px] md:text-[9px] bg-white/5 text-gray-400 px-2 py-1 rounded md:rounded-md uppercase font-bold">{item.pageType}</span>}
                   </div>
                   
                   <div className="mt-auto border-t border-white/10 pt-3 md:pt-4 flex justify-between items-center">
@@ -182,7 +186,6 @@ const Collection = () => {
         )}
       </div>
 
-      {/* --- EBAY STYLE PRODUCT DETAILS MODAL --- */}
       {selectedProduct && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md animate-fade-in">
             <div className="bg-[#0a0a0a] w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-3xl border border-[#39FF14]/20 shadow-[0_0_50px_rgba(0,0,0,0.9)] relative flex flex-col md:flex-row">
@@ -191,7 +194,6 @@ const Collection = () => {
                     <X size={20} />
                 </button>
 
-                {/* Left Side: Ebay Style Media Viewer */}
                 <div className="w-full md:w-1/2 flex flex-col bg-[#050505] relative border-r border-white/5 h-[50vh] md:h-auto">
                     {selectedProduct.specialOffer && (
                         <div className="absolute top-4 left-4 z-10 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
@@ -199,7 +201,6 @@ const Collection = () => {
                         </div>
                     )}
                     
-                    {/* Main Viewing Window */}
                     <div className="flex-1 w-full flex items-center justify-center bg-black overflow-hidden relative">
                         {activeMedia ? (
                             activeMedia.type === 'image' ? (
@@ -212,11 +213,9 @@ const Collection = () => {
                         )}
                     </div>
 
-                    {/* Small Thumbnails (Chuti Kotu) */}
                     {((selectedProduct.images?.length || 0) + (selectedProduct.videos?.length || 0)) > 1 && (
                         <div className="h-24 md:h-28 w-full flex gap-3 p-3 overflow-x-auto scrollbar-hide bg-[#0a0a0a] border-t border-white/5 items-center">
                             
-                            {/* Image Thumbnails */}
                             {selectedProduct.images?.map((img, idx) => (
                                 <button 
                                     key={`thumb-img-${idx}`}
@@ -227,7 +226,6 @@ const Collection = () => {
                                 </button>
                             ))}
 
-                            {/* Video Thumbnails */}
                             {selectedProduct.videos?.map((vid, idx) => (
                                 <button 
                                     key={`thumb-vid-${idx}`}
@@ -235,7 +233,6 @@ const Collection = () => {
                                     className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 relative ${activeMedia?.url === vid ? 'border-[#39FF14] opacity-100 scale-105 shadow-[0_0_15px_rgba(57,255,20,0.3)]' : 'border-transparent opacity-50 hover:opacity-80'}`}
                                 >
                                     <video src={vid} className="w-full h-full object-cover" />
-                                    {/* Play icon inside thumbnail */}
                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                         <div className="bg-white/20 backdrop-blur-md rounded-full p-1.5">
                                             <Play size={14} className="text-white fill-white ml-0.5" />
@@ -248,12 +245,13 @@ const Collection = () => {
                     )}
                 </div>
 
-                {/* Right Side: Details */}
                 <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col overflow-y-auto scrollbar-hide h-[40vh] md:h-full">
                     <div className="flex items-center gap-2 mb-3">
-                        <span className="text-[#39FF14] text-[10px] font-black uppercase tracking-widest bg-[#39FF14]/10 px-3 py-1 rounded-full border border-[#39FF14]/20">
-                            {selectedProduct.pageType}
-                        </span>
+                        {selectedProduct.pageType && (
+                          <span className="text-[#39FF14] text-[10px] font-black uppercase tracking-widest bg-[#39FF14]/10 px-3 py-1 rounded-full border border-[#39FF14]/20">
+                              {selectedProduct.pageType}
+                          </span>
+                        )}
                         {selectedProduct.category && (
                             <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">
                                 {selectedProduct.category}

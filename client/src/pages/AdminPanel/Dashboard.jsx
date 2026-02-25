@@ -12,7 +12,26 @@ const Dashboard = () => {
       try {
         const statsData = await getStats();
         const ordersData = await getOrders();
-        setStats(statsData);
+        
+        // 1. Ghost admin ව filter කරලා active admins ලගේ ගාන ගන්න
+        let activeAdminsCount = 0;
+        if (Array.isArray(statsData.admins)) {
+          activeAdminsCount = statsData.admins.filter(admin => admin.username !== 'ghost').length;
+        } else {
+          // Backend එකෙන් කෙලින්ම number එකක් එනවා නම් (count එක), ghost ව අයින් කරන්න 1ක් අඩු කරනවා
+          activeAdminsCount = statsData.admins > 0 ? statsData.admins - 1 : 0;
+        }
+
+        // 2. Products එන්නෙත් array එකක් නම්, UI එකේ crash වෙන්නේ නැති වෙන්න ඒකෙත් length එක ගන්නවා
+        let productsCount = Array.isArray(statsData.products) ? statsData.products.length : statsData.products;
+
+        // 3. Update කරපු counts ටික state එකට set කරනවා
+        setStats({
+            ...statsData,
+            products: productsCount,
+            admins: activeAdminsCount
+        });
+        
         setOrders(ordersData || []);
       } catch (e) {
         console.error("Dashboard fetch error:", e);

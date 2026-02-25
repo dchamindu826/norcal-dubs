@@ -9,7 +9,9 @@ const ProductManager = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // pageType එක state එකෙන් අයින් කළා
+  // Category filter එකට activeTab state එකක් දැම්මා
+  const [activeTab, setActiveTab] = useState('All');
+
   const [formData, setFormData] = useState({
     id: null, name: '', price: '', offerPrice: '', 
     category: '', 
@@ -30,7 +32,6 @@ const ProductManager = () => {
     }
   };
 
-  // EDIT CLICK HANDLER
   const handleEdit = (product) => {
     setFormData({
         id: product.id,
@@ -48,7 +49,6 @@ const ProductManager = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    // Validate කරන්නේ Name සහ Price විතරයි
     if (!formData.name || !formData.price) {
         return alert("Name and Price are required!");
     }
@@ -105,17 +105,38 @@ const ProductManager = () => {
   const removeImage = (i) => setFormData(p => ({ ...p, images: p.images.filter((_, idx) => idx !== i) }));
   const removeVideo = (i) => setFormData(p => ({ ...p, videos: p.videos.filter((_, idx) => idx !== i) }));
 
+  // Filter වෙන products ටික වෙන් කරගන්නවා
+  const filteredProducts = activeTab === 'All' ? products : products.filter(p => p.category === activeTab);
+
   return (
     <div className="relative pb-20">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 bg-black p-4 rounded-xl sm:rounded-none sm:p-0 sm:bg-transparent border border-gray-800 sm:border-none gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-black p-4 rounded-xl sm:rounded-none sm:p-0 sm:bg-transparent border border-gray-800 sm:border-none gap-4">
         <h2 className="text-2xl sm:text-3xl font-bold text-white">INVENTORY</h2>
         <button onClick={() => setShowForm(true)} className="w-full sm:w-auto bg-[#39FF14] text-black font-bold py-3 sm:py-2 px-4 rounded-xl flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform">
             <Plus size={20} /> ADD DROP
         </button>
       </div>
 
+      {/* Category Filter Bar එක */}
+      <div className="flex gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide">
+        {['All', ...categories].map(cat => (
+          <button
+            key={cat}
+            onClick={() => setActiveTab(cat)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+                activeTab === cat 
+                ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.3)]' 
+                : 'bg-[#111] text-gray-400 border border-white/10 hover:text-white hover:border-white/30'
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        {products.map(p => (
+        {/* Render කරන්නේ filteredProducts ටික */}
+        {filteredProducts.map(p => (
           <div key={p.id} className="bg-[#111] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-800 flex justify-between items-center text-white hover:border-gray-600 transition-colors">
             <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
               <img src={p.images[0] || '/logo-nobg.png'} className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg shrink-0 border border-white/10" />
@@ -123,6 +144,7 @@ const ProductManager = () => {
                 <h3 className="font-bold text-sm sm:text-lg truncate">{p.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
                     <span className="text-gray-400 text-xs sm:text-sm font-mono">${p.price}</span>
+                    <span className="text-[10px] bg-white/5 px-2 py-0.5 rounded text-gray-500 uppercase">{p.category}</span>
                 </div>
               </div>
             </div>
@@ -137,7 +159,7 @@ const ProductManager = () => {
             </div>
           </div>
         ))}
-        {products.length === 0 && <div className="col-span-full text-gray-500 italic p-4 text-center text-sm">No products found.</div>}
+        {filteredProducts.length === 0 && <div className="col-span-full text-gray-500 italic p-4 text-center text-sm">No products found in this category.</div>}
       </div>
 
       {showForm && (
@@ -146,8 +168,6 @@ const ProductManager = () => {
             <div className="pm-header"><span className="pm-title">{formData.id ? 'EDIT DROP' : 'NEW DROP'}</span><button onClick={closeModal} className="pm-close-btn"><X size={24} className="sm:w-7 sm:h-7"/></button></div>
             <div className="pm-body">
               
-              {/* Type Selection Button Area Removed as Requested */}
-
               <div className="pm-grid-2">
                 <div className="pm-group"><label className="pm-label">Product Name</label><input className="pm-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Blue Dream" /></div>
                 
