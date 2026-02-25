@@ -241,6 +241,36 @@ app.delete('/api/categories/:name', (req, res) => {
 
 // > ADMINS
 app.get('/api/admins', (req, res) => res.json(db.get('admins').value()));
+
+// අලුතෙන් Admin කෙනෙක් Add කරන්න (මේක එකතු කරන්න)
+app.post('/api/admins', (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const newAdmin = {
+      id: Date.now(), // Unique ID එකක් හදනවා
+      username,
+      password,
+      active: true
+    };
+    db.get('admins').push(newAdmin).write();
+    res.json({ success: true, admin: newAdmin });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add admin' });
+  }
+});
+
+// Admin කෙනෙක්ව Delete කරන්න (මේක එකතු කරන්න)
+app.delete('/api/admins/:id', (req, res) => {
+  try {
+    db.get('admins').remove({ id: parseInt(req.params.id) }).write();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete admin' });
+  }
+});
+
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   const admin = db.get('admins').find({ username, password }).value();
