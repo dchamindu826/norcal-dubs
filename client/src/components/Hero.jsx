@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import hero1 from '../assets/hero1.jpeg'; // .jpg nemei .jpeg
 import hero2 from '../assets/hero2.jpeg'; // .jpg nemei .jpeg
 import hero3 from '../assets/hero3.jpeg'; // .jpg nemei .jpeg
-import hero4 from '../assets/hero4.jpg';  // Meka hari (.jpg ma thiyanna)
+
 
 const Hero = () => {
   // Slide Data (Image + Text)
@@ -30,12 +30,7 @@ const Hero = () => {
       title: "NATURE'S GIFT", 
       subtitle: "100% Organic & Pesticide Free" 
     },
-    { 
-      id: 4, 
-      image: hero4, 
-      title: "ELEVATED MIND", 
-      subtitle: "Experience the Next Level of Relaxation" 
-    },
+    
   ];
 
   const [current, setCurrent] = useState(0);
